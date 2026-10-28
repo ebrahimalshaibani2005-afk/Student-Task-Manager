@@ -37,3 +37,8 @@ function completeTask(button) {
     let task = button.parentElement;
     task.style.textDecoration = "line-through";
 }
+<li>
+    Study HTML
+    <button onclick="completeTask(this)">Complete</button>
+    <button onclick="deleteTask(this)">Delete</button>
+</li>

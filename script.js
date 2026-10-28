@@ -57,7 +57,7 @@ function completeTask(button) {
     }
 }
 <h3>Completed Tasks: <span id="counter">0</span></h3>
-
+<button onclick="completeTask(this)">Complete</button>
 
 
 

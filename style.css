@@ -50,3 +50,18 @@ button:hover {
         margin-top: 10px;
     }
 }
+
+/* Dark Mode */
+
+body.dark-mode {
+    background-color: #121826;
+    color: white;
+}
+
+.dark-mode .sidebar {
+    background-color: #0B1120;
+}
+
+.dark-mode button {
+    background-color: #3B82F6;
+}

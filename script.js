@@ -42,3 +42,17 @@ function completeTask(button) {
     <button onclick="completeTask(this)">Complete</button>
     <button onclick="deleteTask(this)">Delete</button>
 </li>
+
+let completedTasks = 0;
+
+function completeTask(button) {
+    let task = button.parentElement;
+
+    if (task.style.textDecoration !== "line-through") {
+        task.style.textDecoration = "line-through";
+        completedTasks++;
+
+        document.getElementById("counter").innerText =
+            completedTasks;
+    }
+}

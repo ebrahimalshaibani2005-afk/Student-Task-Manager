@@ -1,0 +1,33 @@
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #F5F7FB;
+    color: #14213B;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #14213B;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+button {
+    background-color: #2563EB;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1D4ED8;
+}

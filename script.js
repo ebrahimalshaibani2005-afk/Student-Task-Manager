@@ -60,6 +60,12 @@ function completeTask(button) {
 <button onclick="completeTask(this)">Complete</button>
 
 
+function getDeadline() {
+    let deadline = document.getElementById("deadline").value;
+
+    return deadline;
+}
+
 
 
 

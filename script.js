@@ -67,6 +67,22 @@ function getDeadline() {
 }
 
 
+function searchTasks() {
+    let search = document.getElementById("searchInput").value.toLowerCase();
+
+    let tasks = document.querySelectorAll("#taskList li");
+
+    tasks.forEach(function(task) {
+        let text = task.textContent.toLowerCase();
+
+        if (text.includes(search)) {
+            task.style.display = "list-item";
+        } else {
+            task.style.display = "none";
+        }
+    });
+}
+
 
 
 

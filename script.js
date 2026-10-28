@@ -32,3 +32,8 @@ function deleteTask(button) {
 
 </body>
 </html>
+
+function completeTask(button) {
+    let task = button.parentElement;
+    task.style.textDecoration = "line-through";
+}

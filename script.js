@@ -35,6 +35,12 @@ function displayTasks() {
                 document.getElementById("totalCount").textContent = tasks.length;
         }
         li.appendChild(span);
+                const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = function () {
+            editTask(task.id);
+        };
+        li.appendChild(editBtn);
 
         list.appendChild(li);
     });

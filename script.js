@@ -14,18 +14,43 @@ function addTask() {
     const input = document.getElementById("taskInput");
     const priority = document.getElementById("priority").value;
     const deadline = getDeadline();
-        const priority = document.getElementById("priority").value;
+    const errorMsg = document.getElementById("errorMsg");
+    const text = input.value.trim();
+
+    if (text === "") {
+        errorMsg.textContent = "Please enter a task.";
+        return;
+    }
+
+    if (text.length < 3) {
+        errorMsg.textContent = "Task must be at least 3 characters.";
+        return;
+    }
+
+    const exists = tasks.some(function (t) {
+        return t.text.toLowerCase() === text.toLowerCase();
+    });
+    if (exists) {
+        errorMsg.textContent = "This task already exists.";
+        return;
+    }
+
+    errorMsg.textContent = "";
 
     tasks.push({
         id: Date.now(),
-        text: input.value,
+        text: text,
         priority: priority,
         deadline: deadline,
         completed: false
     });
 
-    input.value = "";
+    saveTasks();
     displayTasks();
+    input.value = "";
+}
+
+  
     function editTask(id) {
     const task = tasks.find(function (t) {
         return t.id === id;

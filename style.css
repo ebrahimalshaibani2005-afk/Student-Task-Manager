@@ -95,3 +95,19 @@ ul#taskList {
     color: red;
     font-size: 14px;
 }
+/* Student 1 */
+.container {
+    padding: 20px;
+}
+
+ul#taskList {
+    list-style: none;
+    padding: 0;
+}
+
+#taskList li {
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}

@@ -4,6 +4,7 @@ function addTask() {
     const input = document.getElementById("taskInput");
     const priority = document.getElementById("priority").value;
     const deadline = getDeadline();
+        const priority = document.getElementById("priority").value;
 
     tasks.push({
         id: Date.now(),

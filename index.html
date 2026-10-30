@@ -10,17 +10,6 @@
   <div class="container">
     <h1>Student Task Manager</h1>
 
-    //Student 1//
-    <input type="text" id="taskInput" placeholder="Write your task here...">
-    <select id="priority">
-      <option value="High">High</option>
-      <option value="Medium" selected>Medium</option>
-      <option value="Low">Low</option>
-    </select>
-    <button id="addBtn" onclick="addTask()">Add Task</button>
-    <p id="errorMsg" class="error"></p>
-
-  //Student 2//
     <label>Task Deadline:</label>
     <input type="date" id="deadline">
 
@@ -28,12 +17,13 @@
            placeholder="Search tasks..."
            oninput="searchTasks()">
 
-   // Student 1//
-    <p>Total Tasks: <span id="totalCount">0</span></p>
-   //Student 2 //
     <h3>Completed Tasks: <span id="counter">0</span></h3>
 
-    <ul id="taskList"></ul>
+    <ul id="taskList">
+      <li>Study HTML</li>
+      <li>Study JavaScript</li>
+      <li>Finish Assignment</li>
+    </ul>
 
     <button onclick="filterTasks('all')">All</button>
     <button onclick="filterTasks('completed')">Completed</button>

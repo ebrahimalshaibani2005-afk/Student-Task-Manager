@@ -1,5 +1,21 @@
 //Student 1//
 let tasks = [];
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const priority = document.getElementById("priority").value;
+    const deadline = getDeadline();
+
+    tasks.push({
+        id: Date.now(),
+        text: input.value,
+        priority: priority,
+        deadline: deadline,
+        completed: false
+    });
+
+    input.value = "";
+    displayTasks();
+}
 
 function displayTasks() {
     const list = document.getElementById("taskList");

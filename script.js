@@ -1,4 +1,4 @@
-// ===== Student 1 =====
+//Student 1//
 let tasks = [];
 
 function displayTasks() {
@@ -14,6 +14,7 @@ function displayTasks() {
         span.textContent = task.text;
         if (task.deadline) {
             span.textContent += " (Due: " + task.deadline + ")";
+                document.getElementById("totalCount").textContent = tasks.length;
         }
         li.appendChild(span);
 

@@ -29,7 +29,7 @@ function displayTasks() {
 
         const span = document.createElement("span");
         span.className = "task-text";
-        span.textContent = task.text;
+         span.textContent = task.text + " [" + task.priority + "]";
         if (task.deadline) {
             span.textContent += " (Due: " + task.deadline + ")";
                 document.getElementById("totalCount").textContent = tasks.length;

@@ -2,7 +2,19 @@
 let tasks = [];
 
 function addTask() {
-    console.log("Add button clicked");
+    const input = document.getElementById("taskInput");
+    const deadline = getDeadline();
+
+    tasks.push({
+        id: Date.now(),
+        text: input.value,
+        deadline: deadline,
+        completed: false
+    });
+
+    input.value = "";
+    console.log(tasks);
+}
 }
 
 // ===== Student 2 =====

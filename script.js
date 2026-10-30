@@ -25,6 +25,7 @@ function displayTasks() {
     tasks.forEach(function (task) {
         const li = document.createElement("li");
         li.dataset.id = task.id;
+                li.classList.add(task.priority.toLowerCase());
 
         const span = document.createElement("span");
         span.className = "task-text";

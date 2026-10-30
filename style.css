@@ -65,3 +65,33 @@ body.dark-mode {
 .dark-mode button {
     background-color: #3B82F6;
 }
+// Student 1 //
+.container {
+    padding: 20px;
+}
+
+ul#taskList {
+    list-style: none;
+    padding: 0;
+}
+
+#taskList li {
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+#taskList li button {
+    margin-left: 8px;
+    padding: 5px 10px;
+}
+
+.high   { border-left: 5px solid red; }
+.medium { border-left: 5px solid orange; }
+.low    { border-left: 5px solid green; }
+
+.error {
+    color: red;
+    font-size: 14px;
+}

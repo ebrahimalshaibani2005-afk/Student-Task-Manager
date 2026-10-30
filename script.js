@@ -47,6 +47,7 @@ function addTask() {
 function displayTasks() {
     const list = document.getElementById("taskList");
     list.innerHTML = "";
+    let completedCount = 0;
 
     tasks.forEach(function (task) {
         const li = document.createElement("li");
@@ -67,9 +68,31 @@ function displayTasks() {
             editTask(task.id);
         };
         li.appendChild(editBtn);
+       
+                if (task.completed) {
+            li.style.textDecoration = "line-through";
+            completedCount++;
+        }
 
-        list.appendChild(li);
+        const completeBtn = document.createElement("button");
+        completeBtn.textContent = "Complete";
+        completeBtn.onclick = function () {
+            completeTask(completeBtn);
+        };
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = function () {
+            deleteTask(deleteBtn);
+        };
+
+        li.appendChild(completeBtn);
+        li.appendChild(deleteBtn);
+
+      list.appendChild(li);
     });
+    document.getElementById("totalCount").textContent = tasks.length;
+    document.getElementById("counter").textContent = completedCount;
 }
     input.value = "";
 saveTasks();
@@ -79,22 +102,25 @@ saveTasks();
 
 // ===== Student 2 =====
 function deleteTask(button) {
-    button.parentElement.remove();
+    const id = Number(button.parentElement.dataset.id);
+    tasks = tasks.filter(function (t) {
+        return t.id !== id;
+    });
+    saveTasks();
+    displayTasks();
+}
 }
 
-let completedTasks = 0;
 
 function completeTask(button) {
-    let task = button.parentElement;
-
-    if (task.style.textDecoration !== "line-through") {
-        task.style.textDecoration = "line-through";
-        completedTasks++;
-
-        document.getElementById("counter").innerText =
-            completedTasks;
-    }
-}
+    const id = Number(button.parentElement.dataset.id);
+    const task = tasks.find(function (t) {
+        return t.id === id;
+    });
+    task.completed = true;
+    saveTasks();
+    displayTasks();
+}}
 
 function getDeadline() {
     let deadline = document.getElementById("deadline").value;
@@ -108,7 +134,7 @@ function searchTasks() {
     let tasks = document.querySelectorAll("#taskList li");
 
     tasks.forEach(function(task) {
-        let text = task.textContent.toLowerCase();
+           let text = task.querySelector(".task-text").textContent.toLowerCase();
 
         if (text.includes(search)) {
             task.style.display = "list-item";

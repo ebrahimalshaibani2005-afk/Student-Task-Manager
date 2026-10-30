@@ -1,19 +1,27 @@
 // ===== Student 1 =====
 let tasks = [];
 
-function addTask() {
-    const input = document.getElementById("taskInput");
-    const deadline = getDeadline();
+function displayTasks() {
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
 
-    tasks.push({
-        id: Date.now(),
-        text: input.value,
-        deadline: deadline,
-        completed: false
+    tasks.forEach(function (task) {
+        const li = document.createElement("li");
+        li.dataset.id = task.id;
+
+        const span = document.createElement("span");
+        span.className = "task-text";
+        span.textContent = task.text;
+        if (task.deadline) {
+            span.textContent += " (Due: " + task.deadline + ")";
+        }
+        li.appendChild(span);
+
+        list.appendChild(li);
     });
-
+}
     input.value = "";
-    console.log(tasks);
+    displayTasks();
 }
 }
 

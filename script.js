@@ -1,5 +1,15 @@
 //Student 1//
 let tasks = [];
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    const saved = localStorage.getItem("tasks");
+    if (saved) {
+        tasks = JSON.parse(saved);
+    }
+}
 function addTask() {
     const input = document.getElementById("taskInput");
     const priority = document.getElementById("priority").value;
@@ -29,6 +39,7 @@ function addTask() {
     }
 
     task.text = newText.trim();
+     saveTasks();
     displayTasks();
 }
 }
@@ -61,6 +72,7 @@ function displayTasks() {
     });
 }
     input.value = "";
+saveTasks();
     displayTasks();
 }
 }
@@ -123,6 +135,9 @@ function filterTasks(status) {
         }
     });
 }
+
+loadTasks();
+displayTasks();
 
 
 

@@ -16,6 +16,21 @@ function addTask() {
 
     input.value = "";
     displayTasks();
+    function editTask(id) {
+    const task = tasks.find(function (t) {
+        return t.id === id;
+    });
+    const newText = prompt("Edit your task:", task.text);
+
+    if (newText === null) return;
+    if (newText.trim() === "") {
+        alert("Task cannot be empty.");
+        return;
+    }
+
+    task.text = newText.trim();
+    displayTasks();
+}
 }
 
 function displayTasks() {

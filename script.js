@@ -1,3 +1,10 @@
+// ===== Student 1 =====
+let tasks = [];
+
+function addTask() {
+    console.log("Add button clicked");
+}
+
 // ===== Student 2 =====
 function deleteTask(button) {
     button.parentElement.remove();

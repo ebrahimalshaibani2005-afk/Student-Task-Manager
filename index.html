@@ -1,45 +1,52 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Task Manager</title>
-  <link rel="stylesheet" href="style.css">
+    <title>Student Task Manager</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Student Task Manager</h1>
-        <input type="text" id="taskInput" placeholder="Write your task here...">
+
+    <div class="container">
+        <h1>Student Task Manager</h1>
+        <p>Manage your daily tasks</p>
+
+        <button onclick="darkMode()">Dark Mode</button>
+
+        <h2>Add Task</h2>
+
+        <input type="text" id="taskInput"
+               placeholder="Enter your task">
+
         <select id="priority">
-      <option value="High">High</option>
-      <option value="Medium" selected>Medium</option>
-      <option value="Low">Low</option>
-    </select>
-        <button id="addBtn" onclick="addTask()">Add Task</button>
-    <button id="addBtn" onclick="addTask()">Add Task</button>
-    <p id="errorMsg" class="error"></p>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+        </select>
 
-    <label>Task Deadline:</label>
-    <input type="date" id="deadline">
+        <input type="date" id="deadline">
 
-    <input type="text" id="searchInput"
-           placeholder="Search tasks..."
-           oninput="searchTasks()">
-        <p>Total Tasks: <span id="totalCount">0</span></p>
+        <button onclick="addTask()">Add Task</button>
+        <p id="error"></p>
 
-    <h3>Completed Tasks: <span id="counter">0</span></h3>
+        <h2>My Tasks</h2>
 
-    <ul id="taskList">
-          <ul id="taskList"></ul>
-      <li>Study JavaScript</li>
-      <li>Finish Assignment</li>
-    </ul>
+        <input type="text" id="search"
+               placeholder="Search..."
+               oninput="showTasks()">
 
-    <button onclick="filterTasks('all')">All</button>
-    <button onclick="filterTasks('completed')">Completed</button>
-    <button onclick="filterTasks('pending')">Pending</button>
-  </div>
+        <br><br>
 
-  <script src="script.js"></script>
+        <button onclick="filterTasks('all')">All</button>
+        <button onclick="filterTasks('completed')">Completed</button>
+        <button onclick="filterTasks('pending')">Pending</button>
+
+        <p>Total Tasks: <span id="total">0</span></p>
+        <p>Completed Tasks: <span id="completed">0</span></p>
+
+        <ul id="taskList"></ul>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

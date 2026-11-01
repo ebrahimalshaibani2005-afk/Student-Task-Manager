@@ -1,52 +1,125 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Task Manager</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Task Manager</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="app">
 
-    <div class="container">
-        <h1>Student Task Manager</h1>
-        <p>Manage your daily tasks</p>
+    <header class="topbar">
+      <h1>
+        <span class="sun">✳</span> Tasker
+        <small>Student Task Manager</small>
+      </h1>
 
-        <button onclick="darkMode()">Dark Mode</button>
+      <nav>
+        <a href="#overview">Overview</a>
+        <a href="#tasks">My Tasks</a>
+        <a href="#upcoming">Upcoming</a>
+      </nav>
 
-        <h2>Add Task</h2>
+      <button id="themeBtn" onclick="darkMode()">Dark Mode</button>
+    </header>
 
-        <input type="text" id="taskInput"
-               placeholder="Enter your task">
+    <main id="overview">
+      <div class="heading">
+        <div>
+          <h2>Overview</h2>
+          <p>Here is a quick view of your tasks.</p>
+        </div>
+        <a class="orange-button" href="#addSection">+ Add New Task</a>
+      </div>
 
-        <select id="priority">
-            <option>High</option>
-            <option>Medium</option>
-            <option>Low</option>
-        </select>
+      <section class="stats">
+        <article class="stat pink">
+          <span>Upcoming Tasks</span>
+          <strong id="pendingCount">0</strong>
+        </article>
 
-        <input type="date" id="deadline">
+        <article class="stat yellow">
+          <span>In-Progress Tasks</span>
+          <strong id="totalCount">0</strong>
+        </article>
 
-        <button onclick="addTask()">Add Task</button>
-        <p id="error"></p>
+        <article class="stat green">
+          <span>Completed Tasks</span>
+          <strong id="completedCount">0</strong>
+        </article>
+      </section>
 
-        <h2>My Tasks</h2>
+      <div class="columns">
+        <section class="workspace" id="tasks">
 
-        <input type="text" id="search"
-               placeholder="Search..."
-               oninput="showTasks()">
+          <div class="panel" id="addSection">
+            <h3>Add a Task</h3>
 
-        <br><br>
+            <input id="taskInput" type="text"
+              placeholder="Write any task you want...">
 
-        <button onclick="filterTasks('all')">All</button>
-        <button onclick="filterTasks('completed')">Completed</button>
-        <button onclick="filterTasks('pending')">Pending</button>
+            <div class="form-row">
+              <select id="priority">
+                <option>High</option>
+                <option selected>Medium</option>
+                <option>Low</option>
+              </select>
 
-        <p>Total Tasks: <span id="total">0</span></p>
-        <p>Completed Tasks: <span id="completed">0</span></p>
+              <input id="deadline" type="date">
 
-        <ul id="taskList"></ul>
-    </div>
+              <button onclick="addTask()">Add Task</button>
+            </div>
 
-    <script src="script.js"></script>
+            <p id="error" class="error"></p>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <h3>My Tasks</h3>
+              <input id="search" type="text"
+                placeholder="Search tasks..."
+                oninput="showTasks()">
+            </div>
+
+            <div class="filters">
+              <button onclick="filterTasks('all')">All</button>
+              <button onclick="filterTasks('completed')">Completed</button>
+              <button onclick="filterTasks('pending')">Pending</button>
+            </div>
+
+            <ul id="taskList"></ul>
+
+            <p id="emptyMessage" class="muted">
+              No tasks yet. Add your first task!
+            </p>
+          </div>
+
+        </section>
+
+        <aside id="upcoming">
+          <div class="panel">
+            <h3>Today's Tasks</h3>
+            <ul id="todayList" class="small-list"></ul>
+          </div>
+
+          <div class="panel">
+            <h3>Study Progress</h3>
+            <strong id="progressText" class="progress-number">0%</strong>
+
+            <div class="progress">
+              <div id="progressBar"></div>
+            </div>
+
+            <p class="muted">Keep going!</p>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

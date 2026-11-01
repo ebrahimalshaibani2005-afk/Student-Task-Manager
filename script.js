@@ -1,227 +1,154 @@
-//Student 1//
+
 let tasks = [];
+let filter = "all";
+
+// Load saved tasks
+let saved = localStorage.getItem("tasks");
+
+if (saved) {
+    tasks = JSON.parse(saved);
+}
+
+// Save tasks
 function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-function loadTasks() {
-    const saved = localStorage.getItem("tasks");
-    if (saved) {
-        tasks = JSON.parse(saved);
-    }
-}
+// Add task
 function addTask() {
-    const input = document.getElementById("taskInput");
-    const priority = document.getElementById("priority").value;
-    const deadline = getDeadline();
-    const errorMsg = document.getElementById("errorMsg");
-    const text = input.value.trim();
-
-    if (text === "") {
-        errorMsg.textContent = "Please enter a task.";
-        return;
-    }
-
-    if (text.length < 3) {
-        errorMsg.textContent = "Task must be at least 3 characters.";
-        return;
-    }
-
-    const exists = tasks.some(function (t) {
-        return t.text.toLowerCase() === text.toLowerCase();
-    });
-    if (exists) {
-        errorMsg.textContent = "This task already exists.";
-        return;
-    }
-
-    errorMsg.textContent = "";
-
-    tasks.push({
-        id: Date.now(),
-        text: text,
-        priority: priority,
-        deadline: deadline,
-        completed: false
-    });
-
-    saveTasks();
-    displayTasks();
-    input.value = "";
-}
-
-  
-    function editTask(id) {
-    const task = tasks.find(function (t) {
-        return t.id === id;
-    });
-    const newText = prompt("Edit your task:", task.text);
-
-    if (newText === null) return;
-    if (newText.trim() === "") {
-        alert("Task cannot be empty.");
-        return;
-    }
-
-    task.text = newText.trim();
-     saveTasks();
-    displayTasks();
-}
-}
-
-function displayTasks() {
-    const list = document.getElementById("taskList");
-    list.innerHTML = "";
-    let completedCount = 0;
-
-    tasks.forEach(function (task) {
-        const li = document.createElement("li");
-        li.dataset.id = task.id;
-                li.classList.add(task.priority.toLowerCase());
-
-        const span = document.createElement("span");
-        span.className = "task-text";
-         span.textContent = task.text + " [" + task.priority + "]";
-        if (task.deadline) {
-            span.textContent += " (Due: " + task.deadline + ")";
-                document.getElementById("totalCount").textContent = tasks.length;
-        }
-        li.appendChild(span);
-                const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.onclick = function () {
-            editTask(task.id);
-        };
-        li.appendChild(editBtn);
-       
-                if (task.completed) {
-            li.style.textDecoration = "line-through";
-            completedCount++;
-        }
-
-        const completeBtn = document.createElement("button");
-        completeBtn.textContent = "Complete";
-        completeBtn.onclick = function () {
-            completeTask(completeBtn);
-        };
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.onclick = function () {
-            deleteTask(deleteBtn);
-        };
-
-        li.appendChild(completeBtn);
-        li.appendChild(deleteBtn);
-
-      list.appendChild(li);
-    });
-    document.getElementById("totalCount").textContent = tasks.length;
-    document.getElementById("counter").textContent = completedCount;
-}
-    input.value = "";
-saveTasks();
-    displayTasks();
-}
-}
-
-// ===== Student 2 =====
-function deleteTask(button) {
-    const id = Number(button.parentElement.dataset.id);
-    tasks = tasks.filter(function (t) {
-        return t.id !== id;
-    });
-    saveTasks();
-    displayTasks();
-}
-}
-
-
-function completeTask(button) {
-    const id = Number(button.parentElement.dataset.id);
-    const task = tasks.find(function (t) {
-        return t.id === id;
-    });
-    task.completed = true;
-    saveTasks();
-    displayTasks();
-}}
-
-function getDeadline() {
+    let name = document.getElementById("taskInput").value.trim();
+    let priority = document.getElementById("priority").value;
     let deadline = document.getElementById("deadline").value;
 
-    return deadline;
+    if (name == "") {
+        document.getElementById("error").innerText =
+            "Please enter a task";
+        return;
+    }
+
+    let task = {
+        name: name,
+        priority: priority,
+        deadline: deadline,
+        done: false
+    };
+
+    tasks.push(task);
+
+    document.getElementById("taskInput").value = "";
+    document.getElementById("deadline").value = "";
+    document.getElementById("error").innerText = "";
+
+    saveTasks();
+    showTasks();
 }
 
-function searchTasks() {
-    let search = document.getElementById("searchInput").value.toLowerCase();
+// Show tasks
+function showTasks() {
+    let list = document.getElementById("taskList");
+    let search = document.getElementById("search").value.toLowerCase();
 
-    let tasks = document.querySelectorAll("#taskList li");
+    list.innerHTML = "";
 
+    tasks.forEach(function(task, index) {
+        if (!task.name.toLowerCase().includes(search)) {
+            return;
+        }
+
+        if (filter == "completed" && !task.done) {
+            return;
+        }
+
+        if (filter == "pending" && task.done) {
+            return;
+        }
+
+        let li = document.createElement("li");
+
+        let text = document.createElement("span");
+        text.innerText = task.name + " (" + task.priority + ")";
+
+        if (task.deadline != "") {
+            text.innerText += " - " + task.deadline;
+        }
+
+        if (task.done) {
+            text.style.textDecoration = "line-through";
+        }
+
+        li.appendChild(text);
+
+        let complete = document.createElement("button");
+        complete.innerText = task.done ? "Undo" : "Complete";
+        complete.onclick = function() {
+            completeTask(index);
+        };
+        li.appendChild(complete);
+
+        let edit = document.createElement("button");
+        edit.innerText = "Edit";
+        edit.onclick = function() {
+            editTask(index);
+        };
+        li.appendChild(edit);
+
+        let del = document.createElement("button");
+        del.innerText = "Delete";
+        del.onclick = function() {
+            deleteTask(index);
+        };
+        li.appendChild(del);
+
+        list.appendChild(li);
+    });
+
+    document.getElementById("total").innerText = tasks.length;
+
+    let count = 0;
     tasks.forEach(function(task) {
-           let text = task.querySelector(".task-text").textContent.toLowerCase();
-
-        if (text.includes(search)) {
-            task.style.display = "list-item";
-        } else {
-            task.style.display = "none";
+        if (task.done) {
+            count++;
         }
     });
+
+    document.getElementById("completed").innerText = count;
 }
 
-function filterTasks(status) {
-    let tasks = document.querySelectorAll("#taskList li");
-
-    tasks.forEach(function(task) {
-        let completed =
-            task.style.textDecoration === "line-through";
-
-        if (status === "all" ||
-            (status === "completed" && completed) ||
-            (status === "pending" && !completed)) {
-
-            task.style.display = "list-item";
-        } else {
-            task.style.display = "none";
-        }
-    });
+// Complete task
+function completeTask(index) {
+    tasks[index].done = !tasks[index].done;
+    saveTasks();
+    showTasks();
 }
 
-loadTasks();
-displayTasks();
+// Delete task
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    showTasks();
+}
 
+// Edit task
+function editTask(index) {
+    let name = prompt("Edit task:", tasks[index].name);
 
+    if (name != null && name.trim() != "") {
+        tasks[index].name = name.trim();
+        saveTasks();
+        showTasks();
+    }
+}
 
+// Filter tasks
+function filterTasks(type) {
+    filter = type;
+    showTasks();
+}
 
+// Dark mode
+function darkMode() {
+    document.body.classList.toggle("dark");
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+// Show saved tasks
+showTasks();

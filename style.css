@@ -1,124 +1,88 @@
 
 body {
+    font-family: Arial;
+    background: #f5f7fb;
+    color: #14213b;
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #F5F7FB;
-    color: #14213B;
 }
 
-.sidebar {
-    width: 250px;
-    height: 100vh;
-    background-color: #14213B;
-    color: white;
+.container {
+    background: white;
+    max-width: 850px;
+    margin: 30px auto;
     padding: 20px;
-    box-sizing: border-box;
+    border-radius: 10px;
 }
 
 h1 {
-    font-size: 24px;
+    color: #14213b;
+}
+
+input, select {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 button {
-    background-color: #2563EB;
+    background: #2563eb;
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #1D4ED8;
+    background: #1d4ed8;
 }
 
-/* Mobile Responsive Design */
-
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        padding: 15px;
-    }
-
-    h1 {
-        font-size: 20px;
-    }
-
-    button {
-        width: 100%;
-        margin-top: 10px;
-    }
+ul {
+    padding: 0;
+    list-style: none;
 }
 
-/* Dark Mode */
+li {
+    padding: 12px;
+    margin: 10px 0;
+    background: #edf2f7;
+    border-radius: 5px;
+}
 
-body.dark-mode {
-    background-color: #121826;
+li span {
+    display: block;
+    margin-bottom: 10px;
+}
+
+#error {
+    color: red;
+}
+
+.dark {
+    background: #121826;
     color: white;
 }
 
-.dark-mode .sidebar {
-    background-color: #0B1120;
+.dark .container {
+    background: #1e293b;
 }
 
-.dark-mode button {
-    background-color: #3B82F6;
-}
-// Student 1 //
-.container {
-    padding: 20px;
+.dark h1 {
+    color: white;
 }
 
-ul#taskList {
-    list-style: none;
-    padding: 0;
+.dark li {
+    background: #334155;
 }
 
-#taskList li {
-    background-color: white;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-}
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+    }
 
-#taskList li button {
-    margin-left: 8px;
-    padding: 5px 10px;
-}
-
-.high   { border-left: 5px solid red; }
-.medium { border-left: 5px solid orange; }
-.low    { border-left: 5px solid green; }
-
-.error {
-    color: red;
-    font-size: 14px;
-}
-/* Student 1 */
-.container {
-    padding: 20px;
-}
-
-ul#taskList {
-    list-style: none;
-    padding: 0;
-}
-
-#taskList li {
-    background-color: white;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-}
-.high   { border-left: 5px solid red; }
-.medium { border-left: 5px solid orange; }
-.low    { border-left: 5px solid green; }
-#taskList li button {
-    margin-left: 8px;
-    padding: 5px 10px;
-}
-.error {
-    color: red;
-    font-size: 14px;
+    input, select {
+        max-width: 90%;
+    }
 }

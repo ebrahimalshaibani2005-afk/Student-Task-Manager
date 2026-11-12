@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Task Manager</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -10,7 +11,7 @@
 
   <header>
     <h2>✳ Tasker</h2>
-    <nav>Overview | My Tasks | Projects</nav>
+    <nav>Overview | My Tasks | Projects | Calendar</nav>
   </header>
 
   <div class="welcome">
@@ -36,6 +37,11 @@
       <p>Pending</p>
       <h1 id="pending">0</h1>
     </div>
+
+    <div class="yellow">
+      <p>Progress</p>
+      <h1 id="progress">0%</h1>
+    </div>
   </div>
 
   <div class="card">
@@ -52,9 +58,39 @@
       <option value="all">All Tasks</option>
       <option value="pending">Pending</option>
       <option value="completed">Completed</option>
+      <option value="overdue">Overdue</option>
+    </select>
+
+    <select id="subjectFilter" onchange="showTasks()">
+      <option value="all">All Subjects</option>
     </select>
 
     <div id="taskList"></div>
+  </div>
+
+  <div class="two-columns">
+    <div class="card">
+      <h2>Task Reminders 🔔</h2>
+      <div id="reminders"></div>
+    </div>
+
+    <div class="card">
+      <h2>My Subjects 📚</h2>
+      <button onclick="addSubject()">+ Add Subject</button>
+      <div id="subjectList"></div>
+    </div>
+  </div>
+
+  <div class="card calendar-card">
+    <div class="calendar-header">
+      <button onclick="changeMonth(-1)">←</button>
+      <h2 id="monthTitle"></h2>
+      <button onclick="changeMonth(1)">→</button>
+    </div>
+
+    <div id="calendar"></div>
+    <h3 id="selectedDateTitle">Select a date</h3>
+    <div id="dayTasks"></div>
   </div>
 
   <script src="script.js"></script>

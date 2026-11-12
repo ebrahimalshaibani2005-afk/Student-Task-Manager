@@ -51,23 +51,17 @@ button:hover {
   border-radius: 15px;
 }
 
-.orange {
-  background: #f9d9be;
-}
-
-.green {
-  background: #d9f5dc;
-}
-
-.purple {
-  background: #e7e1ff;
-}
+.orange { background: #f9d9be; }
+.green { background: #d9f5dc; }
+.purple { background: #e7e1ff; }
+.yellow { background: #ffebae; }
 
 .card {
   background: white;
   border: 2px solid black;
   border-radius: 20px;
   padding: 25px;
+  margin-bottom: 20px;
 }
 
 input, select {
@@ -90,12 +84,90 @@ input, select {
   color: gray;
 }
 
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.subject {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.reminder {
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  background: #fff1c3;
+}
+
+.overdue {
+  background: #ffe0d8;
+  color: #a52a16;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day, .weekday {
+  padding: 15px 5px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.day {
+  background: #fffae5;
+  border: 1px solid #ddd;
+  color: #222;
+  min-height: 55px;
+}
+
+.day:hover {
+  background: #fbe8b7;
+}
+
+.has-task {
+  border: 2px solid #fe7124;
+}
+
+.weekday {
+  font-weight: bold;
+  background: #f5f5f5;
+}
+
+#dayTasks {
+  padding: 10px;
+}
+
 @media (max-width: 600px) {
   .stats {
     flex-direction: column;
   }
 
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+
   body {
     margin: 15px;
+  }
+
+  nav {
+    font-size: 12px;
+  }
+
+  .day {
+    padding: 8px 2px;
+    min-height: 40px;
   }
 }

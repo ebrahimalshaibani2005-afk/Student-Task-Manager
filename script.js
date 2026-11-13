@@ -1,120 +1,115 @@
 
-// Load saved data
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+// Tasker - Simple Student Project
 
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
+let user = localStorage.getItem("taskerUser");
+let tasks = [];
+let subjects = [];
+let month = new Date();
+let signup = false;
 
-// Get date as YYYY-MM-DD
-function formatDate(date) {
-  let year = date.getFullYear();
-  let month = String(date.getMonth() + 1).padStart(2, "0");
-  let day = String(date.getDate()).padStart(2, "0");
-
-  return year + "-" + month + "-" + day;
+// Save and load data for each username
+function save() {
+  localStorage.setItem("tasks_" + user, JSON.stringify(tasks));
+  localStorage.setItem("subjects_" + user, JSON.stringify(subjects));
 }
 
-// Save data
-function saveTasks() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+function start() {
+  document.getElementById("loginPage").hidden = !!user;
+  document.getElementById("app").hidden = !user;
+  if (!user) return;
+
+  tasks = JSON.parse(localStorage.getItem("tasks_" + user) || "[]");
+  subjects = JSON.parse(localStorage.getItem("subjects_" + user) || "[]");
+  document.getElementById("welcomeName").textContent = user;
+  refresh();
 }
 
-function saveSubjects() {
-  localStorage.setItem("subjects", JSON.stringify(subjects));
+// Demo Sign Up and Login (not secure authentication)
+function switchLogin() {
+  signup = !signup;
+  document.getElementById("loginTitle").textContent =
+    signup ? "Create Account" : "Welcome Back!";
+  document.getElementById("loginSwitch").textContent =
+    signup ? "Back to Login" : "Create an account";
 }
 
-// Add subject
-function addSubject() {
-  let name = prompt("Enter subject name:");
+function login() {
+  let name = document.getElementById("username").value.trim();
+  let users = JSON.parse(localStorage.getItem("taskerUsers") || "[]");
+  let error = document.getElementById("loginError");
 
-  if (name === null || name.trim() === "") {
+  if (!name) {
+    error.textContent = "Please enter a username";
     return;
   }
+
+  if (signup) {
+    if (users.includes(name)) {
+      error.textContent = "Username already exists";
+      return;
+    }
+    users.push(name);
+    localStorage.setItem("taskerUsers", JSON.stringify(users));
+  } else if (!users.includes(name)) {
+    error.textContent = "Account not found. Please sign up.";
+    return;
+  }
+
+  user = name;
+  localStorage.setItem("taskerUser", user);
+  error.textContent = "";
+  start();
+}
+
+function logout() {
+  localStorage.removeItem("taskerUser");
+  user = null;
+  tasks = [];
+  subjects = [];
+  start();
+}
+
+// Add a subject
+function addSubject() {
+  let name = prompt("Subject name:");
+  if (!name || !name.trim()) return;
 
   name = name.trim();
-
-  if (subjects.includes(name)) {
-    alert("Subject already exists");
-    return;
-  }
+  if (subjects.includes(name)) return alert("Subject exists!");
 
   subjects.push(name);
-  saveSubjects();
-  showSubjects();
+  save();
+  refresh();
 }
 
-// Show subjects
-function showSubjects() {
-  let list = document.getElementById("subjectList");
-  let filter = document.getElementById("subjectFilter");
-  let selected = filter.value;
-
-  list.innerHTML = "";
-  filter.innerHTML = '<option value="all">All Subjects</option>';
-
-  for (let i = 0; i < subjects.length; i++) {
-    let row = document.createElement("div");
-    row.className = "subject";
-    row.textContent = "📚 " + subjects[i];
-
-    list.appendChild(row);
-
-    let option = document.createElement("option");
-    option.value = subjects[i];
-    option.textContent = subjects[i];
-    filter.appendChild(option);
-  }
-
-  filter.value = subjects.includes(selected) ? selected : "all";
-  showTasks();
-}
-
-// Add task
+// Add a task
 function addTask() {
-  let name = prompt("Enter task name:");
+  let name = prompt("Task name:");
+  if (!name || !name.trim()) return;
 
-  if (name === null || name.trim() === "") {
-    return;
-  }
+  let date = prompt("Due date (YYYY-MM-DD):", "");
+  if (date === null) return;
 
-  let date = prompt("Due date (YYYY-MM-DD):") || "";
-
-  if (date !== "" && !isValidDate(date)) {
-    alert("Please enter a valid date: YYYY-MM-DD");
-    return;
+  if (date && !validDate(date)) {
+    return alert("Use a valid date: YYYY-MM-DD");
   }
 
   let subject = "General";
-
-  if (subjects.length > 0) {
-    let answer = prompt(
-      "Enter subject:\n" + subjects.join(", "),
-      subjects[0]
-    );
-
-    if (answer === null) return;
-
-    if (!subjects.includes(answer.trim())) {
-      alert("Please choose an existing subject");
-      return;
-    }
-
-    subject = answer.trim();
+  if (subjects.length) {
+    subject = prompt("Subject: " + subjects.join(", "), subjects[0]);
+    if (subject === null) return;
+    if (!subjects.includes(subject)) return alert("Unknown subject");
   }
 
-  let repeat = prompt(
-    "Repeat task: none, daily, weekly",
-    "none"
-  );
-
+  let repeat = prompt("Repeat: none, daily, weekly", "none");
   if (repeat === null) return;
-
   repeat = repeat.toLowerCase().trim();
 
   if (!["none", "daily", "weekly"].includes(repeat)) {
-    alert("Invalid repeat option");
-    return;
+    return alert("Invalid repeat option");
+  }
+  if (repeat !== "none" && !date) {
+    return alert("Repeating tasks need a date");
   }
 
   tasks.push({
@@ -122,299 +117,235 @@ function addTask() {
     date: date,
     subject: subject,
     repeat: repeat,
-    completed: false
+    done: false
   });
 
-  saveTasks();
+  save();
   refresh();
 }
 
-// Validate date
-function isValidDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-
-  let date = new Date(value + "T12:00:00");
-  return !isNaN(date.getTime()) && formatDate(date) === value;
+function validDate(value) {
+  let d = new Date(value + "T12:00:00");
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    !isNaN(d) && dateText(d) === value;
 }
 
-// Show tasks
+function dateText(d) {
+  return d.getFullYear() + "-" +
+    String(d.getMonth() + 1).padStart(2, "0") + "-" +
+    String(d.getDate()).padStart(2, "0");
+}
+
+// Complete task and create next recurring task
+function completeTask(i) {
+  let t = tasks[i];
+  t.done = !t.done;
+
+  if (t.done && t.repeat !== "none" && !t.nextCreated) {
+    let next = new Date(t.date + "T12:00:00");
+    next.setDate(next.getDate() + (t.repeat === "daily" ? 1 : 7));
+
+    tasks.push({
+      name: t.name,
+      date: dateText(next),
+      subject: t.subject,
+      repeat: t.repeat,
+      done: false
+    });
+    t.nextCreated = true;
+  }
+
+  save();
+  refresh();
+}
+
+function editTask(i) {
+  let name = prompt("Edit task:", tasks[i].name);
+  if (!name || !name.trim()) return;
+  tasks[i].name = name.trim();
+  save();
+  refresh();
+}
+
+function deleteTask(i) {
+  if (!confirm("Delete this task?")) return;
+  tasks.splice(i, 1);
+  save();
+  refresh();
+}
+
+// Show tasks, search and filters
 function showTasks() {
   let list = document.getElementById("taskList");
   let search = document.getElementById("search").value.toLowerCase();
   let filter = document.getElementById("filter").value;
-  let subjectFilter = document.getElementById("subjectFilter").value;
-  let today = formatDate(new Date());
+  let subject = document.getElementById("subjectFilter").value;
+  let today = dateText(new Date());
 
-  list.innerHTML = "";
+  list.replaceChildren();
 
-  let completed = 0;
-
-  for (let i = 0; i < tasks.length; i++) {
-    let task = tasks[i];
-
-    if (task.completed) completed++;
-
-    if (!task.name.toLowerCase().includes(search)) continue;
-
-    if (filter === "completed" && !task.completed) continue;
-    if (filter === "pending" && task.completed) continue;
-
-    if (filter === "overdue") {
-      if (task.completed || !task.date || task.date >= today) {
-        continue;
-      }
-    }
-
-    if (subjectFilter !== "all" && task.subject !== subjectFilter) {
-      continue;
-    }
+  tasks.forEach((t, i) => {
+    if (!t.name.toLowerCase().includes(search)) return;
+    if (subject !== "all" && t.subject !== subject) return;
+    if (filter === "completed" && !t.done) return;
+    if (filter === "pending" && t.done) return;
+    if (filter === "overdue" &&
+        (t.done || !t.date || t.date >= today)) return;
 
     let row = document.createElement("div");
-    row.className = "task";
+    row.className = "task" + (t.done ? " done" : "");
 
-    let checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = task.completed;
-    checkbox.onchange = function() {
-      completeTask(i);
-    };
+    let check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = t.done;
+    check.onchange = () => completeTask(i);
 
-    let title = document.createElement("span");
-    title.textContent = task.name;
+    let info = document.createElement("div");
+    info.className = "task-info";
 
-    if (task.completed) {
-      title.style.textDecoration = "line-through";
-    }
+    let title = document.createElement("strong");
+    title.textContent = t.name;
 
-    let info = document.createElement("small");
-    info.textContent =
-      " | " + (task.subject || "General") +
-      " | " + (task.date || "No date") +
-      " | " + (task.repeat || "none");
+    let details = document.createElement("small");
+    details.textContent =
+      t.subject + " • " + (t.date || "No date") +
+      (t.repeat !== "none" ? " • " + t.repeat : "");
+
+    info.append(title, details);
 
     let edit = document.createElement("button");
+    edit.className = "small-btn";
     edit.textContent = "Edit";
-    edit.onclick = function() {
-      editTask(i);
-    };
+    edit.onclick = () => editTask(i);
 
-    let remove = document.createElement("button");
-    remove.textContent = "Delete";
-    remove.onclick = function() {
-      deleteTask(i);
-    };
+    let del = document.createElement("button");
+    del.className = "small-btn delete-btn";
+    del.textContent = "Delete";
+    del.onclick = () => deleteTask(i);
 
-    row.append(checkbox, title, info, edit, remove);
+    row.append(check, info, edit, del);
     list.appendChild(row);
-  }
+  });
 
-  let total = tasks.length;
-  let pending = total - completed;
+  if (!list.children.length) list.textContent = "No tasks found.";
 
-  let progress = total === 0
-    ? 0
-    : Math.round(completed / total * 100);
-
-  document.getElementById("total").textContent = total;
-  document.getElementById("completed").textContent = completed;
-  document.getElementById("pending").textContent = pending;
-  document.getElementById("progress").textContent = progress + "%";
+  let done = tasks.filter(t => t.done).length;
+  document.getElementById("total").textContent = tasks.length;
+  document.getElementById("completed").textContent = done;
+  document.getElementById("pending").textContent = tasks.length - done;
+  document.getElementById("progress").textContent =
+    (tasks.length ? Math.round(done / tasks.length * 100) : 0) + "%";
 }
 
-// Complete task
-function completeTask(index) {
-  let task = tasks[index];
+// Show subjects
+function showSubjects() {
+  let list = document.getElementById("subjectList");
+  let select = document.getElementById("subjectFilter");
+  let selected = select.value;
 
-  if (task.repeat !== "none" && !task.completed && task.date) {
-    // Finish this occurrence and create the next one
-    let nextDate = new Date(task.date + "T12:00:00");
+  list.replaceChildren();
+  select.replaceChildren(new Option("All Subjects", "all"));
 
-    if (task.repeat === "daily") {
-      nextDate.setDate(nextDate.getDate() + 1);
-    }
+  subjects.forEach(s => {
+    let row = document.createElement("div");
+    row.className = "subject";
+    row.textContent = "📚 " + s;
+    list.appendChild(row);
+    select.add(new Option(s, s));
+  });
 
-    if (task.repeat === "weekly") {
-      nextDate.setDate(nextDate.getDate() + 7);
-    }
-
-    let nextTask = {
-      name: task.name,
-      date: formatDate(nextDate),
-      subject: task.subject,
-      repeat: task.repeat,
-      completed: false
-    };
-
-    task.completed = true;
-    tasks.push(nextTask);
-  } else {
-    task.completed = !task.completed;
-  }
-
-  saveTasks();
-  refresh();
+  select.value = subjects.includes(selected) ? selected : "all";
+  if (!subjects.length) list.textContent = "No subjects yet.";
 }
 
-// Edit task
-function editTask(index) {
-  let name = prompt("Edit task:", tasks[index].name);
-
-  if (name !== null && name.trim() !== "") {
-    tasks[index].name = name.trim();
-    saveTasks();
-    refresh();
-  }
-}
-
-// Delete task
-function deleteTask(index) {
-  if (confirm("Delete this task?")) {
-    tasks.splice(index, 1);
-    saveTasks();
-    refresh();
-  }
-}
-
-// Task reminders
+// Reminders: overdue or due within 2 days
 function showReminders() {
   let list = document.getElementById("reminders");
-  let today = new Date(formatDate(new Date()) + "T12:00:00");
+  let today = new Date(dateText(new Date()) + "T12:00:00");
+  list.replaceChildren();
 
-  list.innerHTML = "";
-  let count = 0;
+  tasks.forEach(t => {
+    if (t.done || !t.date) return;
 
-  for (let task of tasks) {
-    if (task.completed || !task.date || !isValidDate(task.date)) {
-      continue;
-    }
+    let days = Math.round(
+      (new Date(t.date + "T12:00:00") - today) / 86400000
+    );
 
-    let due = new Date(task.date + "T12:00:00");
-    let days = Math.round((due - today) / 86400000);
+    if (days > 2) return;
 
-    if (days <= 2) {
-      let row = document.createElement("div");
-      row.className = "reminder";
+    let row = document.createElement("div");
+    row.className = "reminder" + (days < 0 ? " overdue" : "");
+    row.textContent = (days < 0 ? "⚠ Overdue: " :
+      days === 0 ? "🔔 Today: " : "🔔 Soon: ") + t.name;
+    list.appendChild(row);
+  });
 
-      if (days < 0) {
-        row.classList.add("overdue");
-        row.textContent = "⚠ Overdue: " + task.name;
-      } else if (days === 0) {
-        row.textContent = "🔔 Due today: " + task.name;
-      } else {
-        row.textContent =
-          "🔔 Due in " + days + " day(s): " + task.name;
-      }
-
-      list.appendChild(row);
-      count++;
-    }
-  }
-
-  if (count === 0) {
-    list.textContent = "No upcoming reminders 🎉";
-  }
+  if (!list.children.length) list.textContent = "No reminders 🎉";
 }
 
-// Change calendar month
-function changeMonth(amount) {
-  currentMonth += amount;
-
-  if (currentMonth > 11) {
-    currentMonth = 0;
-    currentYear++;
-  }
-
-  if (currentMonth < 0) {
-    currentMonth = 11;
-    currentYear--;
-  }
-
+// Calendar
+function changeMonth(n) {
+  month.setMonth(month.getMonth() + n, 1);
   showCalendar();
 }
 
-// Show calendar
 function showCalendar() {
-  let calendar = document.getElementById("calendar");
-  calendar.innerHTML = "";
+  let grid = document.getElementById("calendar");
+  let year = month.getFullYear();
+  let m = month.getMonth();
+  let first = (new Date(year, m, 1).getDay() + 6) % 7;
+  let count = new Date(year, m + 1, 0).getDate();
 
-  let firstDay = new Date(currentYear, currentMonth, 1);
-  let daysInMonth = new Date(
-    currentYear, currentMonth + 1, 0
-  ).getDate();
-
+  grid.replaceChildren();
   document.getElementById("monthTitle").textContent =
-    firstDay.toLocaleString("en", {
-      month: "long",
-      year: "numeric"
-    });
+    month.toLocaleString("en", { month: "long", year: "numeric" });
 
-  let weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(d => {
+    let cell = document.createElement("div");
+    cell.className = "weekday";
+    cell.textContent = d;
+    grid.appendChild(cell);
+  });
 
-  for (let day of weekDays) {
-    let label = document.createElement("div");
-    label.className = "weekday";
-    label.textContent = day;
-    calendar.appendChild(label);
+  for (let i = 0; i < first; i++) {
+    grid.appendChild(document.createElement("div"));
   }
 
-  let start = (firstDay.getDay() + 6) % 7;
-
-  for (let i = 0; i < start; i++) {
-    calendar.appendChild(document.createElement("div"));
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    let date = formatDate(new Date(currentYear, currentMonth, day));
-
+  for (let day = 1; day <= count; day++) {
+    let date = dateText(new Date(year, m, day));
     let button = document.createElement("button");
     button.className = "day";
     button.textContent = day;
 
-    if (tasks.some(task => task.date === date)) {
+    if (tasks.some(t => t.date === date)) {
       button.classList.add("has-task");
-      button.textContent = day + " •";
     }
 
-    button.onclick = function() {
-      showDayTasks(date);
-    };
-
-    calendar.appendChild(button);
+    button.onclick = () => showDay(date);
+    grid.appendChild(button);
   }
 }
 
-// Show tasks for selected day
-function showDayTasks(date) {
+function showDay(date) {
+  document.getElementById("selectedDate").textContent = date;
   let list = document.getElementById("dayTasks");
-  list.innerHTML = "";
+  list.replaceChildren();
 
-  document.getElementById("selectedDateTitle").textContent =
-    "Tasks for " + date;
+  tasks.filter(t => t.date === date).forEach(t => {
+    let p = document.createElement("p");
+    p.textContent = (t.done ? "✓ " : "○ ") + t.name;
+    list.appendChild(p);
+  });
 
-  let found = false;
-
-  for (let task of tasks) {
-    if (task.date === date) {
-      let row = document.createElement("p");
-      row.textContent =
-        (task.completed ? "✓ " : "○ ") + task.name;
-      list.appendChild(row);
-      found = true;
-    }
-  }
-
-  if (!found) {
-    list.textContent = "No tasks on this date";
-  }
+  if (!list.children.length) list.textContent = "No tasks.";
 }
 
 // Update everything
 function refresh() {
+  showSubjects();
   showTasks();
   showReminders();
   showCalendar();
 }
 
-// Start application
-showSubjects();
-refresh();
+start();

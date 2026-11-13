@@ -3,94 +3,126 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Task Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasker - Student Task Manager</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h2>✳ Tasker</h2>
-    <nav>Overview | My Tasks | Projects | Calendar</nav>
-  </header>
+  <!-- Login and Sign Up -->
+  <div id="loginPage" class="login-page">
+    <div class="login-box">
+      <h1>✳ Tasker</h1>
+      <h2 id="loginTitle">Welcome Back!</h2>
+      <p>Organize your student life.</p>
 
-  <div class="welcome">
-    <h1>Welcome to Tasker 👋</h1>
-    <p>Manage your student tasks easily.</p>
-    <button onclick="addTask()">+ Add New Task</button>
-  </div>
+      <input id="username" placeholder="Your username">
+      <button onclick="login()">Continue</button>
 
-  <h2>My Dashboard</h2>
-
-  <div class="stats">
-    <div class="orange">
-      <p>Total Tasks</p>
-      <h1 id="total">0</h1>
-    </div>
-
-    <div class="green">
-      <p>Completed</p>
-      <h1 id="completed">0</h1>
-    </div>
-
-    <div class="purple">
-      <p>Pending</p>
-      <h1 id="pending">0</h1>
-    </div>
-
-    <div class="yellow">
-      <p>Progress</p>
-      <h1 id="progress">0%</h1>
+      <p id="loginError"></p>
+      <a href="#" onclick="switchLogin(); return false;">
+        <span id="loginSwitch">Create an account</span>
+      </a>
     </div>
   </div>
 
-  <div class="card">
-    <h2>My Tasks</h2>
+  <!-- Dashboard -->
+  <div id="app" hidden>
+    <header>
+      <h2>✳ Tasker</h2>
+      <nav>
+        <a href="#tasks">Tasks</a>
+        <a href="#subjects">Subjects</a>
+        <a href="#calendarCard">Calendar</a>
+      </nav>
+      <button onclick="logout()">Logout</button>
+    </header>
 
-    <input
-      type="text"
-      id="search"
-      placeholder="Search tasks..."
-      oninput="showTasks()"
-    >
+    <main>
+      <section class="welcome">
+        <div>
+          <h1>Hello, <span id="welcomeName">Student</span> 👋</h1>
+          <p>Let's make today productive!</p>
+        </div>
+        <button onclick="addTask()">+ New Task</button>
+      </section>
 
-    <select id="filter" onchange="showTasks()">
-      <option value="all">All Tasks</option>
-      <option value="pending">Pending</option>
-      <option value="completed">Completed</option>
-      <option value="overdue">Overdue</option>
-    </select>
+      <!-- Progress Dashboard -->
+      <div class="stats">
+        <div class="stat orange">
+          <p>Total Tasks</p>
+          <h1 id="total">0</h1>
+        </div>
+        <div class="stat green">
+          <p>Completed</p>
+          <h1 id="completed">0</h1>
+        </div>
+        <div class="stat purple">
+          <p>Pending</p>
+          <h1 id="pending">0</h1>
+        </div>
+        <div class="stat yellow">
+          <p>Progress</p>
+          <h1 id="progress">0%</h1>
+        </div>
+      </div>
 
-    <select id="subjectFilter" onchange="showTasks()">
-      <option value="all">All Subjects</option>
-    </select>
+      <!-- Tasks -->
+      <section class="card" id="tasks">
+        <div class="section-title">
+          <h2>My Tasks</h2>
+          <button onclick="addTask()">+ Add Task</button>
+        </div>
 
-    <div id="taskList"></div>
-  </div>
+        <div class="filters">
+          <input id="search" placeholder="Search tasks..."
+                 oninput="showTasks()">
 
-  <div class="two-columns">
-    <div class="card">
-      <h2>Task Reminders 🔔</h2>
-      <div id="reminders"></div>
-    </div>
+          <select id="filter" onchange="showTasks()">
+            <option value="all">All Tasks</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="overdue">Overdue</option>
+          </select>
 
-    <div class="card">
-      <h2>My Subjects 📚</h2>
-      <button onclick="addSubject()">+ Add Subject</button>
-      <div id="subjectList"></div>
-    </div>
-  </div>
+          <select id="subjectFilter" onchange="showTasks()">
+            <option value="all">All Subjects</option>
+          </select>
+        </div>
 
-  <div class="card calendar-card">
-    <div class="calendar-header">
-      <button onclick="changeMonth(-1)">←</button>
-      <h2 id="monthTitle"></h2>
-      <button onclick="changeMonth(1)">→</button>
-    </div>
+        <div id="taskList"></div>
+      </section>
 
-    <div id="calendar"></div>
-    <h3 id="selectedDateTitle">Select a date</h3>
-    <div id="dayTasks"></div>
+      <div class="columns">
+        <!-- Reminders -->
+        <section class="card">
+          <h2>🔔 Reminders</h2>
+          <div id="reminders"></div>
+        </section>
+
+        <!-- Subjects -->
+        <section class="card" id="subjects">
+          <div class="section-title">
+            <h2>📚 Subjects</h2>
+            <button onclick="addSubject()">+ Add</button>
+          </div>
+          <div id="subjectList"></div>
+        </section>
+      </div>
+
+      <!-- Calendar -->
+      <section class="card" id="calendarCard">
+        <div class="section-title">
+          <button onclick="changeMonth(-1)">←</button>
+          <h2 id="monthTitle"></h2>
+          <button onclick="changeMonth(1)">→</button>
+        </div>
+
+        <div id="calendar"></div>
+        <h3 id="selectedDate"></h3>
+        <div id="dayTasks"></div>
+      </section>
+    </main>
   </div>
 
   <script src="script.js"></script>

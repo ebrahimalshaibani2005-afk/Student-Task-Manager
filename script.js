@@ -1,73 +1,120 @@
 
-// Tasker - Simple Student Project
 
-let user = localStorage.getItem("taskerUser");
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+// Firebase settings
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+let user = null;
 let tasks = [];
 let subjects = [];
 let month = new Date();
 let signup = false;
 
-// Save and load data for each username
+// Save tasks
 function save() {
+  if (!user) return;
+
   localStorage.setItem("tasks_" + user, JSON.stringify(tasks));
   localStorage.setItem("subjects_" + user, JSON.stringify(subjects));
 }
 
-function start() {
-  document.getElementById("loginPage").hidden = !!user;
-  document.getElementById("app").hidden = !user;
-  if (!user) return;
-
-  tasks = JSON.parse(localStorage.getItem("tasks_" + user) || "[]");
-  subjects = JSON.parse(localStorage.getItem("subjects_" + user) || "[]");
-  document.getElementById("welcomeName").textContent = user;
-  refresh();
-}
-
-// Demo Sign Up and Login (not secure authentication)
-function switchLogin() {
+// Switch Login / Sign Up
+window.switchLogin = function() {
   signup = !signup;
+
   document.getElementById("loginTitle").textContent =
     signup ? "Create Account" : "Welcome Back!";
+
+  document.getElementById("loginButton").textContent =
+    signup ? "Sign Up" : "Login";
+
   document.getElementById("loginSwitch").textContent =
     signup ? "Back to Login" : "Create an account";
-}
+};
 
-function login() {
-  let name = document.getElementById("username").value.trim();
-  let users = JSON.parse(localStorage.getItem("taskerUsers") || "[]");
+// Login / Sign Up
+window.login = async function() {
+  let email = document.getElementById("email").value.trim();
+  let password = document.getElementById("password").value;
   let error = document.getElementById("loginError");
 
-  if (!name) {
-    error.textContent = "Please enter a username";
+  if (!email || !password) {
+    error.textContent = "Enter email and password";
     return;
   }
 
-  if (signup) {
-    if (users.includes(name)) {
-      error.textContent = "Username already exists";
-      return;
+  try {
+    if (signup) {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
     }
-    users.push(name);
-    localStorage.setItem("taskerUsers", JSON.stringify(users));
-  } else if (!users.includes(name)) {
-    error.textContent = "Account not found. Please sign up.";
-    return;
+
+    error.textContent = "";
+  } catch (e) {
+    error.textContent = e.code;
   }
+};
 
-  user = name;
-  localStorage.setItem("taskerUser", user);
-  error.textContent = "";
-  start();
-}
+// Logout
+window.logout = async function() {
+  await signOut(auth);
+};
 
-function logout() {
-  localStorage.removeItem("taskerUser");
-  user = null;
-  tasks = [];
-  subjects = [];
-  start();
-}
+// Check logged-in user
+onAuthStateChanged(auth, function(account) {
+  if (account) {
+    user = account.uid;
+
+    tasks = JSON.parse(
+      localStorage.getItem("tasks_" + user) || "[]"
+    );
+
+    subjects = JSON.parse(
+      localStorage.getItem("subjects_" + user) || "[]"
+    );
+
+    document.getElementById("welcomeName").textContent =
+      account.email.split("@")[0];
+
+    document.getElementById("loginPage").hidden = true;
+    document.getElementById("app").hidden = false;
+
+    refresh();
+  } else {
+    user = null;
+    tasks = [];
+    subjects = [];
+
+    document.getElementById("loginPage").hidden = false;
+    document.getElementById("app").hidden = true;
+  }
+});
+
+// Make dashboard buttons work with type="module"
+window.addSubject = addSubject;
+window.addTask = addTask;
+window.showTasks = showTasks;
+window.changeMonth = changeMonth;
+
 
 // Add a subject
 function addSubject() {

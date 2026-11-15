@@ -9,22 +9,30 @@
 </head>
 <body>
 
-  <!-- Login and Sign Up -->
-  <div id="loginPage" class="login-page">
-    <div class="login-box">
-      <h1>✳ Tasker</h1>
-      <h2 id="loginTitle">Welcome Back!</h2>
-      <p>Organize your student life.</p>
+  
+<!-- Login and Sign Up -->
+<div id="loginPage" class="login-page">
+  <div class="login-box">
+    <h1>✳ Tasker</h1>
+    <h2 id="loginTitle">Welcome Back!</h2>
+    <p>Organize your student life.</p>
 
-      <input id="username" placeholder="Your username">
-      <button onclick="login()">Continue</button>
+    <input id="email" type="email"
+           placeholder="Email Address" required>
 
-      <p id="loginError"></p>
-      <a href="#" onclick="switchLogin(); return false;">
-        <span id="loginSwitch">Create an account</span>
-      </a>
-    </div>
+    <input id="password" type="password"
+           placeholder="Password" required>
+
+    <button id="loginButton" onclick="login()">Login</button>
+
+    <p id="loginError"></p>
+
+    <a href="#" onclick="switchLogin(); return false;">
+      <span id="loginSwitch">Create an account</span>
+    </a>
   </div>
+</div>
+
 
   <!-- Dashboard -->
   <div id="app" hidden>

@@ -1,4 +1,7 @@
-
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID",
+appId: "YOUR_APP_ID"
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 

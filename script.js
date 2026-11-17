@@ -1,24 +1,4 @@
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-projectId: "YOUR_PROJECT_ID",
-appId: "YOUR_APP_ID"
-import { initializeApp } from
-  "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 
-import {
-  getAuth, onAuthStateChanged, signOut,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-
-// 1. Firebase configuration
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID"
-};
-
-const auth = getAuth(initializeApp(firebaseConfig));
 const $ = id => document.getElementById(id);
 
 let user = null, tasks = [], subjects = [];
@@ -26,7 +6,7 @@ let signup = false, editIndex = -1;
 let month = new Date();
 let selectedDay = "";
 
-// 2. Save data
+// Save tasks and subjects
 function save() {
   localStorage.setItem("tasks_" + user, JSON.stringify(tasks));
   localStorage.setItem("subjects_" + user, JSON.stringify(subjects));
@@ -38,52 +18,71 @@ function today(d = new Date()) {
     String(d.getDate()).padStart(2, "0");
 }
 
-// 3. Login and Sign Up
+// Switch Login / Sign Up
 $("switchAuth").onclick = e => {
   e.preventDefault();
   signup = !signup;
+
   $("authTitle").textContent = signup ? "Create Account" : "Welcome back!";
   $("authButton").textContent = signup ? "Sign Up" : "Login";
   $("switchAuth").textContent = signup ? "Back to Login" : "Create an account";
   $("authError").textContent = "";
 };
 
-$("authForm").onsubmit = async e => {
+// Create Account / Login
+$("authForm").onsubmit = e => {
   e.preventDefault();
-  $("authError").textContent = "Please wait...";
-  $("authButton").disabled = true;
 
-  try {
-    let email = $("email").value.trim();
-    let password = $("password").value;
+  let email = $("email").value.trim().toLowerCase();
+  let password = $("password").value;
+  let accounts = JSON.parse(localStorage.getItem("taskerAccounts") || "{}");
 
-    if (signup)
-      await createUserWithEmailAndPassword(auth, email, password);
-    else
-      await signInWithEmailAndPassword(auth, email, password);
+  if (signup) {
+    if (accounts[email]) {
+      $("authError").textContent = "Account already exists";
+      return;
+    }
 
-    $("authError").textContent = "";
-  } catch (error) {
-    $("authError").textContent = error.code;
-  } finally {
-    $("authButton").disabled = false;
+    accounts[email] = password;
+    localStorage.setItem("taskerAccounts", JSON.stringify(accounts));
+  } else {
+    if (accounts[email] !== password || !accounts[email]) {
+      $("authError").textContent = "Wrong email or password";
+      return;
+    }
   }
+
+  localStorage.setItem("taskerCurrentUser", email);
+  openDashboard(email);
 };
 
-$("logoutBtn").onclick = () => signOut(auth);
-
-onAuthStateChanged(auth, account => {
-  user = account?.uid || null;
-  $("authPage").hidden = !!user;
-  $("app").hidden = !user;
-
-  if (!user) return;
+// Open Dashboard
+function openDashboard(email) {
+  user = email;
 
   tasks = JSON.parse(localStorage.getItem("tasks_" + user) || "[]");
   subjects = JSON.parse(localStorage.getItem("subjects_" + user) || "[]");
-  $("welcomeName").textContent = account.email.split("@")[0];
+
+  $("welcomeName").textContent = email.split("@")[0];
+  $("authPage").hidden = true;
+  $("app").hidden = false;
+  $("authError").textContent = "";
+
   refresh();
-});
+}
+
+// Logout
+$("logoutBtn").onclick = () => {
+  localStorage.removeItem("taskerCurrentUser");
+  user = null;
+  $("app").hidden = true;
+  $("authPage").hidden = false;
+};
+
+// Keep user logged in after refresh
+let savedUser = localStorage.getItem("taskerCurrentUser");
+if (savedUser) openDashboard(savedUser);
+
 
 // 4. Subject Management
 $("subjectForm").onsubmit = e => {

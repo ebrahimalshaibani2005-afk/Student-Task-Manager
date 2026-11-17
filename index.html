@@ -4,137 +4,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tasker - Student Task Manager</title>
+  <title>Tasker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  
-<!-- Login and Sign Up -->
-<div id="loginPage" class="login-page">
-  <div class="login-box">
+<!-- Login / Sign Up -->
+<section id="authPage" class="auth-page">
+  <form id="authForm" class="auth-card">
     <h1>✳ Tasker</h1>
-    <h2 id="loginTitle">Welcome Back!</h2>
-    <p>Organize your student life.</p>
+    <h2 id="authTitle">Welcome back!</h2>
+    <p>Stay organized. Get things done.</p>
 
-    <input id="email" type="email"
-           placeholder="Email Address" required>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="you@example.com" required>
 
-    <input id="password" type="password"
-           placeholder="Password" required>
+    <label>Password</label>
+    <input id="password" type="password" placeholder="At least 6 characters"
+           minlength="6" required>
 
-    <button id="loginButton" onclick="login()">Login</button>
+    <button id="authButton" type="submit">Login</button>
+    <p id="authError" class="error"></p>
 
-    <p id="loginError"></p>
+    <a href="#" id="switchAuth">Create an account</a>
+  </form>
+</section>
 
-    <a href="#" onclick="switchLogin(); return false;">
-      <span id="loginSwitch">Create an account</span>
-    </a>
-  </div>
+<!-- Dashboard -->
+<div id="app" hidden>
+  <header>
+    <h2>✳ Tasker</h2>
+    <nav>
+      <a href="#tasks">Tasks</a>
+      <a href="#subjects">Subjects</a>
+      <a href="#calendarCard">Calendar</a>
+    </nav>
+    <button id="logoutBtn" class="outline">Logout</button>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <div>
+        <p>YOUR PERSONAL WORKSPACE</p>
+        <h1>Hello, <span id="welcomeName">Student</span> 👋</h1>
+        <span>Plan your day and track your progress.</span>
+      </div>
+      <a class="primary-link" href="#taskForm">+ New Task</a>
+    </section>
+
+    <!-- Progress Dashboard -->
+    <div class="stats">
+      <div class="stat peach"><span>Total Tasks</span><h1 id="total">0</h1></div>
+      <div class="stat mint"><span>Completed</span><h1 id="completed">0</h1></div>
+      <div class="stat lavender"><span>Pending</span><h1 id="pending">0</h1></div>
+      <div class="stat cream"><span>Progress</span><h1 id="progress">0%</h1></div>
+    </div>
+
+    <!-- Add / Edit Task -->
+    <section class="card" id="taskForm">
+      <h2 id="formTitle">✏️ Create a Task</h2>
+      <form id="taskFormElement" class="task-form">
+        <input id="taskName" placeholder="What do you need to do?" required>
+        <input id="taskDate" type="date" required>
+
+        <select id="taskSubject">
+          <option value="General">General</option>
+        </select>
+
+        <select id="taskRepeat">
+          <option value="none">No Repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+
+        <button id="saveTaskBtn" type="submit">+ Add Task</button>
+        <button id="cancelEdit" type="button" class="outline" hidden>
+          Cancel
+        </button>
+      </form>
+    </section>
+
+    <!-- Tasks -->
+    <section class="card" id="tasks">
+      <div class="section-head">
+        <div>
+          <h2>My Tasks</h2>
+          <p>Everything you need to accomplish</p>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input id="search" placeholder="🔍 Search tasks...">
+
+        <select id="filter">
+          <option value="all">All Tasks</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="overdue">Overdue</option>
+        </select>
+
+        <select id="subjectFilter">
+          <option value="all">All Subjects</option>
+        </select>
+      </div>
+
+      <div id="taskList"></div>
+    </section>
+
+    <div class="columns">
+      <!-- Reminders -->
+      <section class="card">
+        <h2>🔔 Reminders</h2>
+        <div id="reminders"></div>
+      </section>
+
+      <!-- Subjects -->
+      <section class="card" id="subjects">
+        <h2>📚 My Subjects</h2>
+        <form id="subjectForm" class="subject-form">
+          <input id="subjectName" placeholder="Add a subject..." required>
+          <button type="submit">Add</button>
+        </form>
+        <div id="subjectList"></div>
+      </section>
+    </div>
+
+    <!-- Calendar -->
+    <section class="card" id="calendarCard">
+      <div class="calendar-head">
+        <h2>📅 Calendar</h2>
+        <div>
+          <button id="prevMonth" class="outline">←</button>
+          <strong id="monthTitle"></strong>
+          <button id="nextMonth" class="outline">→</button>
+        </div>
+      </div>
+
+      <div id="calendar"></div>
+      <h3 id="selectedDate">Select a date</h3>
+      <div id="dayTasks"></div>
+    </section>
+  </main>
 </div>
 
-
-  <!-- Dashboard -->
-  <div id="app" hidden>
-    <header>
-      <h2>✳ Tasker</h2>
-      <nav>
-        <a href="#tasks">Tasks</a>
-        <a href="#subjects">Subjects</a>
-        <a href="#calendarCard">Calendar</a>
-      </nav>
-      <button onclick="logout()">Logout</button>
-    </header>
-
-    <main>
-      <section class="welcome">
-        <div>
-          <h1>Hello, <span id="welcomeName">Student</span> 👋</h1>
-          <p>Let's make today productive!</p>
-        </div>
-        <button onclick="addTask()">+ New Task</button>
-      </section>
-
-      <!-- Progress Dashboard -->
-      <div class="stats">
-        <div class="stat orange">
-          <p>Total Tasks</p>
-          <h1 id="total">0</h1>
-        </div>
-        <div class="stat green">
-          <p>Completed</p>
-          <h1 id="completed">0</h1>
-        </div>
-        <div class="stat purple">
-          <p>Pending</p>
-          <h1 id="pending">0</h1>
-        </div>
-        <div class="stat yellow">
-          <p>Progress</p>
-          <h1 id="progress">0%</h1>
-        </div>
-      </div>
-
-      <!-- Tasks -->
-      <section class="card" id="tasks">
-        <div class="section-title">
-          <h2>My Tasks</h2>
-          <button onclick="addTask()">+ Add Task</button>
-        </div>
-
-        <div class="filters">
-          <input id="search" placeholder="Search tasks..."
-                 oninput="showTasks()">
-
-          <select id="filter" onchange="showTasks()">
-            <option value="all">All Tasks</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="overdue">Overdue</option>
-          </select>
-
-          <select id="subjectFilter" onchange="showTasks()">
-            <option value="all">All Subjects</option>
-          </select>
-        </div>
-
-        <div id="taskList"></div>
-      </section>
-
-      <div class="columns">
-        <!-- Reminders -->
-        <section class="card">
-          <h2>🔔 Reminders</h2>
-          <div id="reminders"></div>
-        </section>
-
-        <!-- Subjects -->
-        <section class="card" id="subjects">
-          <div class="section-title">
-            <h2>📚 Subjects</h2>
-            <button onclick="addSubject()">+ Add</button>
-          </div>
-          <div id="subjectList"></div>
-        </section>
-      </div>
-
-      <!-- Calendar -->
-      <section class="card" id="calendarCard">
-        <div class="section-title">
-          <button onclick="changeMonth(-1)">←</button>
-          <h2 id="monthTitle"></h2>
-          <button onclick="changeMonth(1)">→</button>
-        </div>
-
-        <div id="calendar"></div>
-        <h3 id="selectedDate"></h3>
-        <div id="dayTasks"></div>
-      </section>
-    </main>
-  </div>
-
-  <!-- JavaScript -->
-  <script type="module" src="script.js"></script>
-
+<script type="module" src="script.js"></script>
 </body>
 </html>

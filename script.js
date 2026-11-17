@@ -1,17 +1,13 @@
 
-
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 
 import {
-  getAuth,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
+  getAuth, onAuthStateChanged, signOut,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-// Firebase settings
+// 1. Firebase configuration
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -19,171 +15,159 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const auth = getAuth(initializeApp(firebaseConfig));
+const $ = id => document.getElementById(id);
 
-let user = null;
-let tasks = [];
-let subjects = [];
+let user = null, tasks = [], subjects = [];
+let signup = false, editIndex = -1;
 let month = new Date();
-let signup = false;
+let selectedDay = "";
 
-// Save tasks
+// 2. Save data
 function save() {
-  if (!user) return;
-
   localStorage.setItem("tasks_" + user, JSON.stringify(tasks));
   localStorage.setItem("subjects_" + user, JSON.stringify(subjects));
 }
 
-// Switch Login / Sign Up
-window.switchLogin = function() {
-  signup = !signup;
-
-  document.getElementById("loginTitle").textContent =
-    signup ? "Create Account" : "Welcome Back!";
-
-  document.getElementById("loginButton").textContent =
-    signup ? "Sign Up" : "Login";
-
-  document.getElementById("loginSwitch").textContent =
-    signup ? "Back to Login" : "Create an account";
-};
-
-// Login / Sign Up
-window.login = async function() {
-  let email = document.getElementById("email").value.trim();
-  let password = document.getElementById("password").value;
-  let error = document.getElementById("loginError");
-
-  if (!email || !password) {
-    error.textContent = "Enter email and password";
-    return;
-  }
-
-  try {
-    if (signup) {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
-
-    error.textContent = "";
-  } catch (e) {
-    error.textContent = e.code;
-  }
-};
-
-// Logout
-window.logout = async function() {
-  await signOut(auth);
-};
-
-// Check logged-in user
-onAuthStateChanged(auth, function(account) {
-  if (account) {
-    user = account.uid;
-
-    tasks = JSON.parse(
-      localStorage.getItem("tasks_" + user) || "[]"
-    );
-
-    subjects = JSON.parse(
-      localStorage.getItem("subjects_" + user) || "[]"
-    );
-
-    document.getElementById("welcomeName").textContent =
-      account.email.split("@")[0];
-
-    document.getElementById("loginPage").hidden = true;
-    document.getElementById("app").hidden = false;
-
-    refresh();
-  } else {
-    user = null;
-    tasks = [];
-    subjects = [];
-
-    document.getElementById("loginPage").hidden = false;
-    document.getElementById("app").hidden = true;
-  }
-});
-
-// Make dashboard buttons work with type="module"
-window.addSubject = addSubject;
-window.addTask = addTask;
-window.showTasks = showTasks;
-window.changeMonth = changeMonth;
-
-
-// Add a subject
-function addSubject() {
-  let name = prompt("Subject name:");
-  if (!name || !name.trim()) return;
-
-  name = name.trim();
-  if (subjects.includes(name)) return alert("Subject exists!");
-
-  subjects.push(name);
-  save();
-  refresh();
-}
-
-// Add a task
-function addTask() {
-  let name = prompt("Task name:");
-  if (!name || !name.trim()) return;
-
-  let date = prompt("Due date (YYYY-MM-DD):", "");
-  if (date === null) return;
-
-  if (date && !validDate(date)) {
-    return alert("Use a valid date: YYYY-MM-DD");
-  }
-
-  let subject = "General";
-  if (subjects.length) {
-    subject = prompt("Subject: " + subjects.join(", "), subjects[0]);
-    if (subject === null) return;
-    if (!subjects.includes(subject)) return alert("Unknown subject");
-  }
-
-  let repeat = prompt("Repeat: none, daily, weekly", "none");
-  if (repeat === null) return;
-  repeat = repeat.toLowerCase().trim();
-
-  if (!["none", "daily", "weekly"].includes(repeat)) {
-    return alert("Invalid repeat option");
-  }
-  if (repeat !== "none" && !date) {
-    return alert("Repeating tasks need a date");
-  }
-
-  tasks.push({
-    name: name.trim(),
-    date: date,
-    subject: subject,
-    repeat: repeat,
-    done: false
-  });
-
-  save();
-  refresh();
-}
-
-function validDate(value) {
-  let d = new Date(value + "T12:00:00");
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    !isNaN(d) && dateText(d) === value;
-}
-
-function dateText(d) {
+function today(d = new Date()) {
   return d.getFullYear() + "-" +
     String(d.getMonth() + 1).padStart(2, "0") + "-" +
     String(d.getDate()).padStart(2, "0");
 }
 
-// Complete task and create next recurring task
+// 3. Login and Sign Up
+$("switchAuth").onclick = e => {
+  e.preventDefault();
+  signup = !signup;
+  $("authTitle").textContent = signup ? "Create Account" : "Welcome back!";
+  $("authButton").textContent = signup ? "Sign Up" : "Login";
+  $("switchAuth").textContent = signup ? "Back to Login" : "Create an account";
+  $("authError").textContent = "";
+};
+
+$("authForm").onsubmit = async e => {
+  e.preventDefault();
+  $("authError").textContent = "Please wait...";
+  $("authButton").disabled = true;
+
+  try {
+    let email = $("email").value.trim();
+    let password = $("password").value;
+
+    if (signup)
+      await createUserWithEmailAndPassword(auth, email, password);
+    else
+      await signInWithEmailAndPassword(auth, email, password);
+
+    $("authError").textContent = "";
+  } catch (error) {
+    $("authError").textContent = error.code;
+  } finally {
+    $("authButton").disabled = false;
+  }
+};
+
+$("logoutBtn").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, account => {
+  user = account?.uid || null;
+  $("authPage").hidden = !!user;
+  $("app").hidden = !user;
+
+  if (!user) return;
+
+  tasks = JSON.parse(localStorage.getItem("tasks_" + user) || "[]");
+  subjects = JSON.parse(localStorage.getItem("subjects_" + user) || "[]");
+  $("welcomeName").textContent = account.email.split("@")[0];
+  refresh();
+});
+
+// 4. Subject Management
+$("subjectForm").onsubmit = e => {
+  e.preventDefault();
+  let name = $("subjectName").value.trim();
+
+  if (!name || subjects.includes(name)) return;
+
+  subjects.push(name);
+  $("subjectName").value = "";
+  save();
+  refresh();
+};
+
+function showSubjects() {
+  $("subjectList").replaceChildren();
+  let selected = $("subjectFilter").value;
+  $("subjectFilter").replaceChildren(new Option("All Subjects", "all"));
+  $("taskSubject").replaceChildren(new Option("General", "General"));
+
+  subjects.forEach(name => {
+    let row = document.createElement("div");
+    row.className = "subject";
+    row.textContent = "📚 " + name;
+    $("subjectList").append(row);
+    $("subjectFilter").add(new Option(name, name));
+    $("taskSubject").add(new Option(name, name));
+  });
+
+  $("subjectFilter").value =
+    subjects.includes(selected) ? selected : "all";
+}
+
+// 5. Add and Edit Task
+$("taskFormElement").onsubmit = e => {
+  e.preventDefault();
+
+  let task = {
+    name: $("taskName").value.trim(),
+    date: $("taskDate").value,
+    subject: $("taskSubject").value,
+    repeat: $("taskRepeat").value,
+    done: false
+  };
+
+  if (!task.name || !task.date) return;
+
+  if (editIndex === -1) {
+    tasks.push(task);
+  } else {
+    tasks[editIndex] = {
+      ...tasks[editIndex], ...task,
+      done: tasks[editIndex].done
+    };
+  }
+
+  cancelEdit();
+  save();
+  refresh();
+};
+
+function cancelEdit() {
+  editIndex = -1;
+  $("taskFormElement").reset();
+  $("formTitle").textContent = "✏️ Create a Task";
+  $("saveTaskBtn").textContent = "+ Add Task";
+  $("cancelEdit").hidden = true;
+}
+
+$("cancelEdit").onclick = cancelEdit;
+
+function editTask(i) {
+  let t = tasks[i];
+  editIndex = i;
+
+  $("taskName").value = t.name;
+  $("taskDate").value = t.date;
+  $("taskSubject").value = t.subject;
+  $("taskRepeat").value = t.repeat;
+
+  $("formTitle").textContent = "Edit Task";
+  $("saveTaskBtn").textContent = "Save Changes";
+  $("cancelEdit").hidden = false;
+  $("taskForm").scrollIntoView({ behavior: "smooth" });
+}
+
+// 6. Complete, Repeat and Delete
 function completeTask(i) {
   let t = tasks[i];
   t.done = !t.done;
@@ -193,11 +177,7 @@ function completeTask(i) {
     next.setDate(next.getDate() + (t.repeat === "daily" ? 1 : 7));
 
     tasks.push({
-      name: t.name,
-      date: dateText(next),
-      subject: t.subject,
-      repeat: t.repeat,
-      done: false
+      ...t, date: today(next), done: false, nextCreated: false
     });
     t.nextCreated = true;
   }
@@ -206,28 +186,20 @@ function completeTask(i) {
   refresh();
 }
 
-function editTask(i) {
-  let name = prompt("Edit task:", tasks[i].name);
-  if (!name || !name.trim()) return;
-  tasks[i].name = name.trim();
-  save();
-  refresh();
-}
-
 function deleteTask(i) {
   if (!confirm("Delete this task?")) return;
   tasks.splice(i, 1);
+  cancelEdit();
   save();
   refresh();
 }
 
-// Show tasks, search and filters
+// 7. Search, Filters and Progress
 function showTasks() {
-  let list = document.getElementById("taskList");
-  let search = document.getElementById("search").value.toLowerCase();
-  let filter = document.getElementById("filter").value;
-  let subject = document.getElementById("subjectFilter").value;
-  let today = dateText(new Date());
+  let list = $("taskList");
+  let search = $("search").value.toLowerCase();
+  let filter = $("filter").value;
+  let subject = $("subjectFilter").value;
 
   list.replaceChildren();
 
@@ -236,8 +208,7 @@ function showTasks() {
     if (subject !== "all" && t.subject !== subject) return;
     if (filter === "completed" && !t.done) return;
     if (filter === "pending" && t.done) return;
-    if (filter === "overdue" &&
-        (t.done || !t.date || t.date >= today)) return;
+    if (filter === "overdue" && (t.done || t.date >= today())) return;
 
     let row = document.createElement("div");
     row.className = "task" + (t.done ? " done" : "");
@@ -254,68 +225,49 @@ function showTasks() {
     title.textContent = t.name;
 
     let details = document.createElement("small");
-    details.textContent =
-      t.subject + " • " + (t.date || "No date") +
+    details.textContent = t.subject + " • " + t.date +
       (t.repeat !== "none" ? " • " + t.repeat : "");
-
     info.append(title, details);
 
     let edit = document.createElement("button");
-    edit.className = "small-btn";
     edit.textContent = "Edit";
+    edit.className = "small-btn";
     edit.onclick = () => editTask(i);
 
     let del = document.createElement("button");
-    del.className = "small-btn delete-btn";
     del.textContent = "Delete";
+    del.className = "small-btn delete-btn";
     del.onclick = () => deleteTask(i);
 
     row.append(check, info, edit, del);
-    list.appendChild(row);
+    list.append(row);
   });
 
   if (!list.children.length) list.textContent = "No tasks found.";
 
   let done = tasks.filter(t => t.done).length;
-  document.getElementById("total").textContent = tasks.length;
-  document.getElementById("completed").textContent = done;
-  document.getElementById("pending").textContent = tasks.length - done;
-  document.getElementById("progress").textContent =
+  $("total").textContent = tasks.length;
+  $("completed").textContent = done;
+  $("pending").textContent = tasks.length - done;
+  $("progress").textContent =
     (tasks.length ? Math.round(done / tasks.length * 100) : 0) + "%";
 }
 
-// Show subjects
-function showSubjects() {
-  let list = document.getElementById("subjectList");
-  let select = document.getElementById("subjectFilter");
-  let selected = select.value;
+["search", "filter", "subjectFilter"].forEach(id => {
+  $(id).addEventListener("input", showTasks);
+});
 
-  list.replaceChildren();
-  select.replaceChildren(new Option("All Subjects", "all"));
-
-  subjects.forEach(s => {
-    let row = document.createElement("div");
-    row.className = "subject";
-    row.textContent = "📚 " + s;
-    list.appendChild(row);
-    select.add(new Option(s, s));
-  });
-
-  select.value = subjects.includes(selected) ? selected : "all";
-  if (!subjects.length) list.textContent = "No subjects yet.";
-}
-
-// Reminders: overdue or due within 2 days
+// 8. Reminders
 function showReminders() {
-  let list = document.getElementById("reminders");
-  let today = new Date(dateText(new Date()) + "T12:00:00");
+  let list = $("reminders");
   list.replaceChildren();
 
   tasks.forEach(t => {
     if (t.done || !t.date) return;
 
     let days = Math.round(
-      (new Date(t.date + "T12:00:00") - today) / 86400000
+      (new Date(t.date + "T12:00:00") -
+       new Date(today() + "T12:00:00")) / 86400000
     );
 
     if (days > 2) return;
@@ -323,76 +275,79 @@ function showReminders() {
     let row = document.createElement("div");
     row.className = "reminder" + (days < 0 ? " overdue" : "");
     row.textContent = (days < 0 ? "⚠ Overdue: " :
-      days === 0 ? "🔔 Today: " : "🔔 Soon: ") + t.name;
-    list.appendChild(row);
+      days === 0 ? "🔔 Today: " : "🔔 Coming soon: ") + t.name;
+    list.append(row);
   });
 
   if (!list.children.length) list.textContent = "No reminders 🎉";
 }
 
-// Calendar
-function changeMonth(n) {
-  month.setMonth(month.getMonth() + n, 1);
-  showCalendar();
-}
-
+// 9. Calendar
 function showCalendar() {
-  let grid = document.getElementById("calendar");
-  let year = month.getFullYear();
-  let m = month.getMonth();
-  let first = (new Date(year, m, 1).getDay() + 6) % 7;
-  let count = new Date(year, m + 1, 0).getDate();
+  let grid = $("calendar");
+  let y = month.getFullYear(), m = month.getMonth();
+
+  $("monthTitle").textContent =
+    month.toLocaleString("en", { month: "long", year: "numeric" });
 
   grid.replaceChildren();
-  document.getElementById("monthTitle").textContent =
-    month.toLocaleString("en", { month: "long", year: "numeric" });
 
   ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(d => {
     let cell = document.createElement("div");
     cell.className = "weekday";
     cell.textContent = d;
-    grid.appendChild(cell);
+    grid.append(cell);
   });
 
-  for (let i = 0; i < first; i++) {
-    grid.appendChild(document.createElement("div"));
-  }
+  let offset = (new Date(y, m, 1).getDay() + 6) % 7;
+  for (let i = 0; i < offset; i++)
+    grid.append(document.createElement("div"));
 
-  for (let day = 1; day <= count; day++) {
-    let date = dateText(new Date(year, m, day));
-    let button = document.createElement("button");
-    button.className = "day";
-    button.textContent = day;
+  let count = new Date(y, m + 1, 0).getDate();
 
-    if (tasks.some(t => t.date === date)) {
-      button.classList.add("has-task");
-    }
+  for (let d = 1; d <= count; d++) {
+    let date = today(new Date(y, m, d));
+    let btn = document.createElement("button");
+    btn.className = "day";
 
-    button.onclick = () => showDay(date);
-    grid.appendChild(button);
+    if (tasks.some(t => t.date === date))
+      btn.classList.add("has-task");
+
+    btn.textContent = d;
+    btn.onclick = () => showDay(date);
+    grid.append(btn);
   }
 }
 
 function showDay(date) {
-  document.getElementById("selectedDate").textContent = date;
-  let list = document.getElementById("dayTasks");
-  list.replaceChildren();
+  selectedDay = date;
+  $("selectedDate").textContent = date;
+  $("dayTasks").replaceChildren();
 
   tasks.filter(t => t.date === date).forEach(t => {
     let p = document.createElement("p");
     p.textContent = (t.done ? "✓ " : "○ ") + t.name;
-    list.appendChild(p);
+    $("dayTasks").append(p);
   });
 
-  if (!list.children.length) list.textContent = "No tasks.";
+  if (!$("dayTasks").children.length)
+    $("dayTasks").textContent = "No tasks on this date.";
 }
 
-// Update everything
+$("prevMonth").onclick = () => changeMonth(-1);
+$("nextMonth").onclick = () => changeMonth(1);
+
+function changeMonth(n) {
+  month.setDate(1);
+  month.setMonth(month.getMonth() + n);
+  showCalendar();
+}
+
+// 10. Update Dashboard
 function refresh() {
   showSubjects();
   showTasks();
   showReminders();
   showCalendar();
+  if (selectedDay) showDay(selectedDay);
 }
-
-start();

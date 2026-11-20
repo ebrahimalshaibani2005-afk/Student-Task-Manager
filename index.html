@@ -20,8 +20,23 @@
     <input id="email" type="email" placeholder="you@example.com" required>
 
     <label>Password</label>
-    <input id="password" type="password" placeholder="At least 6 characters"
-           minlength="6" required>
+    <input id="password" type="password" placeholder="At least 8 characters"
+           minlength="8" required>
+
+    
+<div id="confirmBox" hidden>
+  <label for="confirmPassword">
+    Confirm Password
+  </label>
+
+  <input
+    id="confirmPassword"
+    type="password"
+    placeholder="Confirm your password"
+    minlength="8"
+  >
+</div>
+
 
     <button id="authButton" type="submit">Login</button>
     <p id="authError" class="error"></p>

@@ -22,7 +22,15 @@
 
     <label for="password">Password</label>
     <input id="password" type="password" placeholder="At least 8 characters"
-           minlength="8" required>
+           minlength="8" autocomplete="current-password" required>
+
+    <!-- Only visible when creating an account -->
+    <div id="confirmBox" hidden>
+      <label for="confirmPassword">Confirm Password</label>
+      <input id="confirmPassword" type="password"
+             placeholder="Repeat your password" minlength="8"
+             autocomplete="new-password">
+    </div>
 
     <button id="authButton" type="submit">Login</button>
     <p id="authError" class="error" role="alert" aria-live="polite"></p>

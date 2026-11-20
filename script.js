@@ -1,15 +1,27 @@
-
 const $ = id => document.getElementById(id);
-
 let user = null, tasks = [], subjects = [];
 let signup = false, editIndex = -1;
 let month = new Date();
 let selectedDay = "";
 
-// Save tasks and subjects
-function save() {
-  localStorage.setItem("tasks_" + user, JSON.stringify(tasks));
-  localStorage.setItem("subjects_" + user, JSON.stringify(subjects));
+async function api(url, method = "GET", body) {
+  const options = { method, credentials: "same-origin" };
+  if (body !== undefined) {
+    options.headers = { "Content-Type": "application/json" };
+    options.body = JSON.stringify(body);
+  }
+  let response;
+  try {
+    response = await fetch("/api" + url, options);
+  } catch {
+    throw new Error("Cannot reach Tasker server. Start it with npm run dev.");
+  }
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.error || "Request failed (" + response.status + ")");
+  }
+  if (response.status === 204) return null;
+  return response.json();
 }
 
 function today(d = new Date()) {
@@ -18,130 +30,122 @@ function today(d = new Date()) {
     String(d.getDate()).padStart(2, "0");
 }
 
-// Switch Login / Sign Up
-$("switchAuth").onclick = e => {
-  e.preventDefault();
+function errorMessage(error) {
+  alert(error.message || "Something went wrong");
+}
+async function loadData() {
+  [tasks, subjects] = await Promise.all([api("/tasks"), api("/subjects")]);
+  refresh();
+}
+async function openDashboard(account) {
+  user = account;
+  $("welcomeName").textContent = account.email.split("@")[0];
+  $("authPage").hidden = true;
+  $("app").hidden = false;
+  try { await loadData(); } catch (error) { errorMessage(error); }
+}
+$("switchAuth").onclick = event => {
+  event.preventDefault();
   signup = !signup;
-
   $("authTitle").textContent = signup ? "Create Account" : "Welcome back!";
   $("authButton").textContent = signup ? "Sign Up" : "Login";
   $("switchAuth").textContent = signup ? "Back to Login" : "Create an account";
   $("authError").textContent = "";
 };
-
-// Create Account / Login
-$("authForm").onsubmit = e => {
-  e.preventDefault();
-
-  let email = $("email").value.trim().toLowerCase();
-  let password = $("password").value;
-  let accounts = JSON.parse(localStorage.getItem("taskerAccounts") || "{}");
-
-  if (signup) {
-    if (accounts[email]) {
-      $("authError").textContent = "Account already exists";
-      return;
-    }
-
-    accounts[email] = password;
-    localStorage.setItem("taskerAccounts", JSON.stringify(accounts));
-  } else {
-    if (accounts[email] !== password || !accounts[email]) {
-      $("authError").textContent = "Wrong email or password";
-      return;
-    }
-  }
-
-  localStorage.setItem("taskerCurrentUser", email);
-  openDashboard(email);
-};
-
-// Open Dashboard
-function openDashboard(email) {
-  user = email;
-
-  tasks = JSON.parse(localStorage.getItem("tasks_" + user) || "[]");
-  subjects = JSON.parse(localStorage.getItem("subjects_" + user) || "[]");
-
-  $("welcomeName").textContent = email.split("@")[0];
-  $("authPage").hidden = true;
-  $("app").hidden = false;
+$("authForm").onsubmit = async event => {
+  event.preventDefault();
   $("authError").textContent = "";
-
-  refresh();
-}
-
-// Logout
-$("logoutBtn").onclick = () => {
-  localStorage.removeItem("taskerCurrentUser");
-  user = null;
+  $("authButton").disabled = true;
+  try {
+    const email = $("email").value.trim().toLowerCase();
+    const password = $("password").value;
+    const result = await api(signup ? "/auth/signup" : "/auth/login", "POST", { email, password });
+    $("authForm").reset();
+    await openDashboard(result.user);
+  } catch (error) {
+    $("authError").textContent = error.message;
+  } finally {
+    $("authButton").disabled = false;
+  }
+};
+$("logoutBtn").onclick = async () => {
+  try {
+    await api("/auth/logout", "POST");
+    user = null;
+    tasks = [];
+    subjects = [];
+    $("app").hidden = true;
+    $("authPage").hidden = false;
+  } catch (error) { errorMessage(error); }
+};
+api("/me").then(result => openDashboard(result.user)).catch(() => {
   $("app").hidden = true;
   $("authPage").hidden = false;
-};
-
-// Keep user logged in after refresh
-let savedUser = localStorage.getItem("taskerCurrentUser");
-if (savedUser) openDashboard(savedUser);
-
+});
 
 // 4. Subject Management
-$("subjectForm").onsubmit = e => {
+$("subjectForm").onsubmit = async e => {
   e.preventDefault();
-  let name = $("subjectName").value.trim();
-
-  if (!name || subjects.includes(name)) return;
-
-  subjects.push(name);
-  $("subjectName").value = "";
-  save();
-  refresh();
+  const name = $("subjectName").value.trim();
+  if (!name || subjects.some(s => s.name === name)) return;
+  try {
+    await api("/subjects", "POST", { name });
+    $("subjectName").value = "";
+    await loadData();
+  } catch (error) { errorMessage(error); }
 };
 
 function showSubjects() {
   $("subjectList").replaceChildren();
-  let selected = $("subjectFilter").value;
+  const selected = $("subjectFilter").value;
+  const taskSelection = $("taskSubject").value;
   $("subjectFilter").replaceChildren(new Option("All Subjects", "all"));
   $("taskSubject").replaceChildren(new Option("General", "General"));
 
-  subjects.forEach(name => {
-    let row = document.createElement("div");
+  subjects.forEach(subject => {
+    const row = document.createElement("div");
     row.className = "subject";
-    row.textContent = "📚 " + name;
+    const label = document.createElement("span");
+    label.textContent = "📚 " + subject.name;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "small-btn delete-btn";
+    remove.textContent = "Delete";
+    remove.setAttribute("aria-label", "Delete " + subject.name);
+    remove.onclick = async () => {
+      if (!confirm("Delete this subject? Existing tasks keep their subject name.")) return;
+      try { await api("/subjects/" + subject.id, "DELETE"); await loadData(); }
+      catch (error) { errorMessage(error); }
+    };
+    row.append(label, remove);
     $("subjectList").append(row);
-    $("subjectFilter").add(new Option(name, name));
-    $("taskSubject").add(new Option(name, name));
+    $("subjectFilter").add(new Option(subject.name, subject.name));
+    $("taskSubject").add(new Option(subject.name, subject.name));
   });
 
-  $("subjectFilter").value =
-    subjects.includes(selected) ? selected : "all";
+  const names = subjects.map(s => s.name);
+  $("subjectFilter").value = names.includes(selected) ? selected : "all";
+  $("taskSubject").value = names.includes(taskSelection) ? taskSelection : "General";
 }
 
 // 5. Add and Edit Task
-$("taskFormElement").onsubmit = e => {
+$("taskFormElement").onsubmit = async e => {
   e.preventDefault();
-
-  let task = {
+  const task = {
     name: $("taskName").value.trim(),
     date: $("taskDate").value,
     subject: $("taskSubject").value,
-    repeat: $("taskRepeat").value,
-    done: false
+    repeat: $("taskRepeat").value
   };
-
   if (!task.name || !task.date) return;
-
-  if (editIndex === -1) {
-    tasks.push(task);
-  } else {
-    tasks[editIndex] = {
-      ...tasks[editIndex], ...task,
-      done: tasks[editIndex].done
-    };
-  }
-
-  cancelEdit();
-  save();
-  refresh();
+  try {
+    if (editIndex === -1)
+      await api("/tasks", "POST", task);
+    else
+      await api("/tasks/" + tasks[editIndex].id, "PATCH", task);
+    cancelEdit();
+    await loadData();
+  } catch (error) { errorMessage(error); }
 };
 
 function cancelEdit() {
@@ -169,31 +173,21 @@ function editTask(i) {
   $("taskForm").scrollIntoView({ behavior: "smooth" });
 }
 
-// 6. Complete, Repeat and Delete
-function completeTask(i) {
-  let t = tasks[i];
-  t.done = !t.done;
-
-  if (t.done && t.repeat !== "none" && !t.nextCreated) {
-    let next = new Date(t.date + "T12:00:00");
-    next.setDate(next.getDate() + (t.repeat === "daily" ? 1 : 7));
-
-    tasks.push({
-      ...t, date: today(next), done: false, nextCreated: false
-    });
-    t.nextCreated = true;
-  }
-
-  save();
-  refresh();
+// 6. Complete and Delete
+async function completeTask(i) {
+  try {
+    const task = tasks[i];
+    await api("/tasks/" + task.id, "PATCH", { done: !task.done });
+    await loadData();
+  } catch (error) { errorMessage(error); }
 }
-
-function deleteTask(i) {
+async function deleteTask(i) {
   if (!confirm("Delete this task?")) return;
-  tasks.splice(i, 1);
-  cancelEdit();
-  save();
-  refresh();
+  try {
+    await api("/tasks/" + tasks[i].id, "DELETE");
+    cancelEdit();
+    await loadData();
+  } catch (error) { errorMessage(error); }
 }
 
 // 7. Search, Filters and Progress

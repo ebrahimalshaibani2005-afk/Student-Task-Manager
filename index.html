@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tasker - manage student tasks, subjects, and deadlines.">
   <title>Tasker</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -16,15 +17,15 @@
     <h2 id="authTitle">Welcome back!</h2>
     <p>Stay organized. Get things done.</p>
 
-    <label>Email</label>
+    <label for="email">Email</label>
     <input id="email" type="email" placeholder="you@example.com" required>
 
-    <label>Password</label>
-    <input id="password" type="password" placeholder="At least 6 characters"
-           minlength="6" required>
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="At least 8 characters"
+           minlength="8" required>
 
     <button id="authButton" type="submit">Login</button>
-    <p id="authError" class="error"></p>
+    <p id="authError" class="error" role="alert" aria-live="polite"></p>
 
     <a href="#" id="switchAuth">Create an account</a>
   </form>
@@ -64,13 +65,17 @@
     <section class="card" id="taskForm">
       <h2 id="formTitle">✏️ Create a Task</h2>
       <form id="taskFormElement" class="task-form">
+        <label class="sr-only" for="taskName">Task name</label>
         <input id="taskName" placeholder="What do you need to do?" required>
+        <label class="sr-only" for="taskDate">Task due date</label>
         <input id="taskDate" type="date" required>
 
+        <label class="sr-only" for="taskSubject">Task subject</label>
         <select id="taskSubject">
           <option value="General">General</option>
         </select>
 
+        <label class="sr-only" for="taskRepeat">Repeat frequency</label>
         <select id="taskRepeat">
           <option value="none">No Repeat</option>
           <option value="daily">Daily</option>
@@ -94,8 +99,10 @@
       </div>
 
       <div class="filters">
+        <label class="sr-only" for="search">Search tasks</label>
         <input id="search" placeholder="🔍 Search tasks...">
 
+        <label class="sr-only" for="filter">Filter by status</label>
         <select id="filter">
           <option value="all">All Tasks</option>
           <option value="pending">Pending</option>
@@ -103,6 +110,7 @@
           <option value="overdue">Overdue</option>
         </select>
 
+        <label class="sr-only" for="subjectFilter">Filter by subject</label>
         <select id="subjectFilter">
           <option value="all">All Subjects</option>
         </select>
@@ -122,6 +130,7 @@
       <section class="card" id="subjects">
         <h2>📚 My Subjects</h2>
         <form id="subjectForm" class="subject-form">
+          <label class="sr-only" for="subjectName">Subject name</label>
           <input id="subjectName" placeholder="Add a subject..." required>
           <button type="submit">Add</button>
         </form>
@@ -134,9 +143,9 @@
       <div class="calendar-head">
         <h2>📅 Calendar</h2>
         <div>
-          <button id="prevMonth" class="outline">←</button>
+          <button id="prevMonth" type="button" aria-label="Previous month" class="outline">←</button>
           <strong id="monthTitle"></strong>
-          <button id="nextMonth" class="outline">→</button>
+          <button id="nextMonth" type="button" aria-label="Next month" class="outline">→</button>
         </div>
       </div>
 
